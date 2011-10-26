@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using ONet;
+using System.Net;
 
 namespace SpaceInvaders
 {
@@ -20,18 +21,23 @@ namespace SpaceInvaders
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         GameServer server;
+        Client client;
         Dictionary<int, ClientInfo> clients;
+        KeyboardState lastState;
+        KeyboardBuffer keyboardBuffer;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             clients = new Dictionary<int, ClientInfo>();
+            lastState = new KeyboardState();
+            keyboardBuffer = new KeyboardBuffer(this.Window.Handle);
         }
 
         public void ClientConnects(int clientNumber, GameMessage message)
         {
-            clients.Add(clientNumber, new ClientInfo(clientNumber, String.Format("client: {0}, addr: ", clientNumber)));            
+            clients.Add(clientNumber, new ClientInfo(clientNumber, String.Format("client: {0}, addr: {1}", clientNumber, server.Connections[clientNumber].Socket.RemoteEndPoint.ToString())));            
         }
 
         public void ClientDisconnects(int clientNumber, GameMessage message)
@@ -97,7 +103,7 @@ namespace SpaceInvaders
             {
                 this.Exit();
             }
-            if (keyState.IsKeyDown(Keys.P))
+            if (keyState.IsKeyDown(Keys.P) && !lastState.IsKeyDown(Keys.P))
             {
                 if (server == null)
                 {
@@ -107,8 +113,15 @@ namespace SpaceInvaders
                     server.OnClientMessage = new GameServer.Callback(ClientMessage);
                 }
             }
+            if (keyState.IsKeyDown(Keys.C) && !lastState.IsKeyDown(Keys.C))
+            {
+                if (client == null)
+                {
+                    client = new Client(new IPEndPoint(IPAddress.Parse("192.168.1.1"), 8024));
+                }
+            }
             // TODO: Add your update logic here
-
+            lastState = keyState;
             base.Update(gameTime);
         }
 
