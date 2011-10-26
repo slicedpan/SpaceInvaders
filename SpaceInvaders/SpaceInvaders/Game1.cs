@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using ONet;
 
 namespace SpaceInvaders
 {
@@ -18,12 +19,33 @@ namespace SpaceInvaders
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        GameServer server;
+        Dictionary<int, ClientInfo> clients;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            clients = new Dictionary<int, ClientInfo>();
         }
+
+        public void ClientConnects(int clientNumber, GameMessage message)
+        {
+            clients.Add(clientNumber, new ClientInfo(clientNumber, String.Format("client: {0}, addr: ", clientNumber)));            
+        }
+
+        public void ClientDisconnects(int clientNumber, GameMessage message)
+        {
+            clients.Remove(clientNumber);
+        }
+
+        public void ClientMessage(int clientNumber, GameMessage message)
+        {
+            if (message.DataType == MessageType.SetName)
+            {
+
+            }
+        }   
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -67,9 +89,24 @@ namespace SpaceInvaders
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
+            KeyboardState keyState;
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
-
+            keyState = Keyboard.GetState();
+            if (keyState.IsKeyDown(Keys.Escape))
+            {
+                this.Exit();
+            }
+            if (keyState.IsKeyDown(Keys.P))
+            {
+                if (server == null)
+                {
+                    server = new GameServer();
+                    server.OnClientConnect = new GameServer.Callback(ClientConnects);
+                    server.OnClientDisconnect = new GameServer.Callback(ClientDisconnects);
+                    server.OnClientMessage = new GameServer.Callback(ClientMessage);
+                }
+            }
             // TODO: Add your update logic here
 
             base.Update(gameTime);
