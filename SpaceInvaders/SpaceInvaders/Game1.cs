@@ -20,24 +20,34 @@ namespace SpaceInvaders
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        GameServer server;
-        Client client;
+        public static GameServer Server;
+        public static Client Client;
         Dictionary<int, ClientInfo> clients;
         KeyboardState lastState;
-        KeyboardBuffer keyboardBuffer;
+        public static KeyboardBuffer KeyboardBuffer;
+        public static int width = 800;
+        public static int height = 600;
+        ScreenManager screenManager;
+        public static SpriteFont Font;
+        string curMessage = "";
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = width;
+            graphics.PreferredBackBufferHeight = height;
+            graphics.ApplyChanges();
             Content.RootDirectory = "Content";
             clients = new Dictionary<int, ClientInfo>();
             lastState = new KeyboardState();
-            keyboardBuffer = new KeyboardBuffer(this.Window.Handle);
+            KeyboardBuffer = new KeyboardBuffer(this.Window.Handle);
+            KeyboardBuffer.Enabled = true;
+            KeyboardBuffer.TranslateMessage = true;            
         }
 
         public void ClientConnects(int clientNumber, GameMessage message)
         {
-            clients.Add(clientNumber, new ClientInfo(clientNumber, String.Format("client: {0}, addr: {1}", clientNumber, server.Connections[clientNumber].Socket.RemoteEndPoint.ToString())));            
+            clients.Add(clientNumber, new ClientInfo(clientNumber, String.Format("client: {0}, addr: {1}", clientNumber, Server.Connections[clientNumber].Socket.RemoteEndPoint.ToString())));            
         }
 
         public void ClientDisconnects(int clientNumber, GameMessage message)
@@ -73,8 +83,9 @@ namespace SpaceInvaders
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            screenManager = new ScreenManager(GraphicsDevice, Content);
+            screenManager.SetScreen(new TestScreen());
+            Font = Content.Load<SpriteFont>("Segoe");
             // TODO: use this.Content to load your game content here
         }
 
@@ -105,22 +116,23 @@ namespace SpaceInvaders
             }
             if (keyState.IsKeyDown(Keys.P) && !lastState.IsKeyDown(Keys.P))
             {
-                if (server == null)
+                if (Server == null)
                 {
-                    server = new GameServer();
-                    server.OnClientConnect = new GameServer.Callback(ClientConnects);
-                    server.OnClientDisconnect = new GameServer.Callback(ClientDisconnects);
-                    server.OnClientMessage = new GameServer.Callback(ClientMessage);
+                    Server = new GameServer();
+                    Server.OnClientConnect = new GameServer.Callback(ClientConnects);
+                    Server.OnClientDisconnect = new GameServer.Callback(ClientDisconnects);
+                    Server.OnClientMessage = new GameServer.Callback(ClientMessage);
                 }
             }
             if (keyState.IsKeyDown(Keys.C) && !lastState.IsKeyDown(Keys.C))
             {
-                if (client == null)
+                if (Client == null)
                 {
-                    client = new Client(new IPEndPoint(IPAddress.Parse("192.168.1.1"), 8024));
+                    Client = new Client(new IPEndPoint(IPAddress.Parse(curMessage), 8024));
                 }
             }
             // TODO: Add your update logic here
+            curMessage += KeyboardBuffer.GetText();
             lastState = keyState;
             base.Update(gameTime);
         }
@@ -132,9 +144,7 @@ namespace SpaceInvaders
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            // TODO: Add your drawing code here
-
+            screenManager.Draw(gameTime);
             base.Draw(gameTime);
         }
     }

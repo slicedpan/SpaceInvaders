@@ -30,7 +30,7 @@ namespace Microsoft.Xna.Framework.Input
         }
     }
 
-    public class KeyboardBuffer: MessageHook
+    public class KeyboardBuffer : MessageHook
     {
         public bool Enabled { get; set; }
 
@@ -44,13 +44,13 @@ namespace Microsoft.Xna.Framework.Input
 
         public StringBuilder Text { get; private set; }
 
-        public KeyboardBuffer( IntPtr window )
-            : base( window )
+        public KeyboardBuffer(IntPtr window)
+            : base(window)
         {
             KeyData = new Stack<KeyData>();
             Text = new StringBuilder();
         }
-        
+
         public string GetText()
         {
             string text = Text.ToString();
@@ -58,122 +58,122 @@ namespace Microsoft.Xna.Framework.Input
             return text;
         }
 
-        protected override void Hook( ref Message m )
+        protected override void Hook(ref Message m)
         {
-            switch ( m.msg )
+            switch (m.msg)
             {
-            case Wm.KeyDown:
-                if ( !Enabled )
-                    break;
-                //
-                KeyData data;
-                if ( (m.lparam.ToInt32() & (1 << 30)) == 0 )//iff repeat count == 0
-                {
-                    switch ( (Vk)m.wparam )
-                    {
-                    case Vk.Control:
-                        if ( (m.lparam.ToInt32() & (1 << 24)) == 0 )
-                        {
-                            data = new KeyData { Key = Keys.LeftControl, Modifier = modifier };
-                            KeyData.Push( ref data );
-                            modifier |= KeyModifiers.LeftControl;
-                        }
-                        else
-                        {
-                            data = new KeyData { Key = Keys.RightControl, Modifier = modifier };
-                            KeyData.Push( ref data );
-                            modifier |= KeyModifiers.RightControl;
-                        }
-                        break;
-                    case Vk.Alt:
-                        if ( (m.lparam.ToInt32() & (1 << 24)) == 0 )
-                        {
-                            data = new KeyData { Key = Keys.LeftAlt, Modifier = modifier };
-                            KeyData.Push( ref data );
-                            modifier |= KeyModifiers.LeftAlt;
-                        }
-                        else
-                        {
-                            data = new KeyData { Key = Keys.RightAlt, Modifier = modifier };
-                            KeyData.Push( ref data );
-                            modifier |= KeyModifiers.RightAlt;
-                        }
-                        break;
-                    case Vk.Shift:
-                        if ( (m.lparam.ToInt32() & (1 << 24)) == 0 )
-                        {
-                            data = new KeyData { Key = Keys.LeftShift, Modifier = modifier };
-                            KeyData.Push( ref data );
-                            modifier |= KeyModifiers.LeftShift;
-                        }
-                        else
-                        {
-                            data = new KeyData { Key = Keys.RightShift, Modifier = modifier };
-                            KeyData.Push( ref data );
-                            modifier |= KeyModifiers.RightShift;
-                        }
+                case Wm.KeyDown:
+                    if (!Enabled)
                         break;
                     //
-                    default:
-                        data = new KeyData { Key = (Keys)m.wparam, Modifier = modifier };
-                        KeyData.Push( ref data );
-                        break;
+                    KeyData data;
+                    if ((m.lparam.ToInt32() & (1 << 30)) == 0)//iff repeat count == 0
+                    {
+                        switch ((Vk)m.wparam)
+                        {
+                            case Vk.Control:
+                                if ((m.lparam.ToInt32() & (1 << 24)) == 0)
+                                {
+                                    data = new KeyData { Key = Keys.LeftControl, Modifier = modifier };
+                                    KeyData.Push(ref data);
+                                    modifier |= KeyModifiers.LeftControl;
+                                }
+                                else
+                                {
+                                    data = new KeyData { Key = Keys.RightControl, Modifier = modifier };
+                                    KeyData.Push(ref data);
+                                    modifier |= KeyModifiers.RightControl;
+                                }
+                                break;
+                            case Vk.Alt:
+                                if ((m.lparam.ToInt32() & (1 << 24)) == 0)
+                                {
+                                    data = new KeyData { Key = Keys.LeftAlt, Modifier = modifier };
+                                    KeyData.Push(ref data);
+                                    modifier |= KeyModifiers.LeftAlt;
+                                }
+                                else
+                                {
+                                    data = new KeyData { Key = Keys.RightAlt, Modifier = modifier };
+                                    KeyData.Push(ref data);
+                                    modifier |= KeyModifiers.RightAlt;
+                                }
+                                break;
+                            case Vk.Shift:
+                                if ((m.lparam.ToInt32() & (1 << 24)) == 0)
+                                {
+                                    data = new KeyData { Key = Keys.LeftShift, Modifier = modifier };
+                                    KeyData.Push(ref data);
+                                    modifier |= KeyModifiers.LeftShift;
+                                }
+                                else
+                                {
+                                    data = new KeyData { Key = Keys.RightShift, Modifier = modifier };
+                                    KeyData.Push(ref data);
+                                    modifier |= KeyModifiers.RightShift;
+                                }
+                                break;
+                            //
+                            default:
+                                data = new KeyData { Key = (Keys)m.wparam, Modifier = modifier };
+                                KeyData.Push(ref data);
+                                break;
+                        }
                     }
-                }
-                //
-                if ( TranslateMessage )
-                    _TranslateMessage( ref m );
-                //
-                break;
+                    //
+                    if (TranslateMessage)
+                        _TranslateMessage(ref m);
+                    //
+                    break;
 
-            case Wm.Char:
-                char c = (char)m.wparam;
-                if ( c < (char)0x20 
-                    && c != '\n'
-                    && c != '\r'
-                    //&& c != '\t'//tab //uncomment to accept tab
-                    && c != '\b' )//backspace
+                case Wm.Char:
+                    char c = (char)m.wparam;
+                    if (c < (char)0x20
+                        && c != '\n'
+                        && c != '\r'
+                        //&& c != '\t'//tab //uncomment to accept tab
+                        && c != '\b')//backspace
+                        break;
+                    //
+                    if (c == '\r')
+                        c = '\n';//Note: Control+ENTER will send \n, just ENTER will send \r
+                    //
+                    if (c == '\b' && Text.Length > 0 && Text[Text.Length - 1] != '\b')
+                        Text.Length--;//pop 1
+                    //
+                    Text.Append(c);
                     break;
-                //
-                if ( c == '\r' )
-                    c = '\n';//Note: Control+ENTER will send \n, just ENTER will send \r
-                //
-                if ( c == '\b' && Text.Length > 0 && Text[Text.Length - 1] != '\b' )
-                    Text.Length--;//pop 1
-                //
-                Text.Append( c );
-                break;
-                
-            case Wm.KeyUp:
-                switch ( (Vk)m.wparam )
-                {
-                case Vk.Control:
-                    if ( (m.lparam.ToInt32() & (1 << 24)) == 0 )
-                        modifier &= ~KeyModifiers.LeftControl;
-                    else
-                        modifier &= ~KeyModifiers.RightControl;
-                    break;
-                case Vk.Alt:
-                    if ( (m.lparam.ToInt32() & (1 << 24)) == 0 )
-                        modifier &= ~KeyModifiers.LeftAlt;
-                    else
-                        modifier &= ~KeyModifiers.RightAlt;
-                    break;
-                case Vk.Shift:
-                    if ( (m.lparam.ToInt32() & (1 << 24)) == 0 )
-                        modifier &= ~KeyModifiers.LeftShift;
-                    else
-                        modifier &= ~KeyModifiers.RightShift;
-                    break;
-                }
-                break;
 
-            case Wm.Active:
-                if ( ((int)m.wparam & 0xffff) == (int)Wa.Inactive )
-                {
-                    modifier = KeyModifiers.None;
-                }
-                break;
+                case Wm.KeyUp:
+                    switch ((Vk)m.wparam)
+                    {
+                        case Vk.Control:
+                            if ((m.lparam.ToInt32() & (1 << 24)) == 0)
+                                modifier &= ~KeyModifiers.LeftControl;
+                            else
+                                modifier &= ~KeyModifiers.RightControl;
+                            break;
+                        case Vk.Alt:
+                            if ((m.lparam.ToInt32() & (1 << 24)) == 0)
+                                modifier &= ~KeyModifiers.LeftAlt;
+                            else
+                                modifier &= ~KeyModifiers.RightAlt;
+                            break;
+                        case Vk.Shift:
+                            if ((m.lparam.ToInt32() & (1 << 24)) == 0)
+                                modifier &= ~KeyModifiers.LeftShift;
+                            else
+                                modifier &= ~KeyModifiers.RightShift;
+                            break;
+                    }
+                    break;
+
+                case Wm.Active:
+                    if (((int)m.wparam & 0xffff) == (int)Wa.Inactive)
+                    {
+                        modifier = KeyModifiers.None;
+                    }
+                    break;
             }
         }
     }
