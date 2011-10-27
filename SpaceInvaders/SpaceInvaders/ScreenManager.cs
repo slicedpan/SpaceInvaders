@@ -18,6 +18,8 @@ namespace SpaceInvaders
         public IGameScreen currentScreen;
         public IGameScreen lastScreen;
         ContentManager ContentManager;
+        RenderTarget2D oldRenderTarget;
+        RenderTarget2D newRenderTarget;
 
         float lastAlpha = 0.0f;
         float currentAlpha = 0.0f;
@@ -32,6 +34,8 @@ namespace SpaceInvaders
                 ContentManager = cm;
                 GraphicsDevice = graphicsDevice;
                 SpriteBatch = new SpriteBatch(graphicsDevice);
+                newRenderTarget = new RenderTarget2D(GraphicsDevice, Game1.width, Game1.height, false, SurfaceFormat.Color, DepthFormat.Depth24);
+                oldRenderTarget = new RenderTarget2D(GraphicsDevice, Game1.width, Game1.height, false, SurfaceFormat.Color, DepthFormat.Depth24);
                 currentInstance = this;
             }
             else
@@ -42,28 +46,26 @@ namespace SpaceInvaders
         public void SetScreen(IGameScreen screen)
         {
             currentScreen = screen;
+            currentScreen.LoadContent(ContentManager);
         }
         public void Draw(GameTime gameTime)
         {
-            currentScreen.Draw(gameTime);
             if (transition)
             {
-                lastScreen.Draw(gameTime);
-            }
-            GraphicsDevice.SetRenderTarget(null);
-            GraphicsDevice.Clear(Color.Black);
-
-            SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-            if (transition)
-            {
-                SpriteBatch.Draw(currentScreen.RenderTarget, new Vector2(0.0f, 0.0f), new Color(1.0f, 1.0f, 1.0f, currentAlpha));
-                SpriteBatch.Draw(lastScreen.RenderTarget, new Vector2(0.0f, 0.0f), new Color(1.0f, 1.0f, 1.0f, lastAlpha));
+                GraphicsDevice.SetRenderTarget(newRenderTarget);
+                currentScreen.Draw(gameTime, GraphicsDevice);
+                GraphicsDevice.SetRenderTarget(oldRenderTarget);
+                lastScreen.Draw(gameTime, GraphicsDevice);
+                SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
+                SpriteBatch.Draw(newRenderTarget, new Vector2(0.0f, 0.0f), new Color(1.0f, 1.0f, 1.0f, currentAlpha));
+                SpriteBatch.Draw(oldRenderTarget, new Vector2(0.0f, 0.0f), new Color(1.0f, 1.0f, 1.0f, lastAlpha));
+                SpriteBatch.End();
             }
             else
             {
-                SpriteBatch.Draw(currentScreen.RenderTarget, new Vector2(0.0f, 0.0f), Color.White);
-            }
-            SpriteBatch.End();
+                GraphicsDevice.SetRenderTarget(null);
+                currentScreen.Draw(gameTime, GraphicsDevice);
+            }            
         }
         public void Update(GameTime gameTime)
         {

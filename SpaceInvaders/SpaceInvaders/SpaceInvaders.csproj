@@ -113,6 +113,7 @@
     <Compile Include="ClientInfo.cs" />
     <Compile Include="IGameScreen.cs" />
     <Compile Include="KeyboardBuffer.cs" />
+    <Compile Include="MenuScreen.cs" />
     <Compile Include="MessageHook.cs" />
     <Compile Include="MessageType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

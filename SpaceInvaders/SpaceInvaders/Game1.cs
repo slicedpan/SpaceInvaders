@@ -19,7 +19,7 @@ namespace SpaceInvaders
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        public static SpriteBatch SpriteBatch;
         public static GameServer Server;
         public static Client Client;
         Dictionary<int, ClientInfo> clients;
@@ -41,7 +41,6 @@ namespace SpaceInvaders
             clients = new Dictionary<int, ClientInfo>();
             lastState = new KeyboardState();
             KeyboardBuffer = new KeyboardBuffer(this.Window.Handle);
-            KeyboardBuffer.Enabled = true;
             KeyboardBuffer.TranslateMessage = true;            
         }
 
@@ -83,8 +82,9 @@ namespace SpaceInvaders
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
-            screenManager = new ScreenManager(GraphicsDevice, Content);
-            screenManager.SetScreen(new TestScreen());
+            SpriteBatch = new SpriteBatch(GraphicsDevice);
+            screenManager = new ScreenManager(GraphicsDevice, Content);            
+            screenManager.SetScreen(new MenuScreen());
             Font = Content.Load<SpriteFont>("Segoe");
             // TODO: use this.Content to load your game content here
         }
@@ -114,26 +114,9 @@ namespace SpaceInvaders
             {
                 this.Exit();
             }
-            if (keyState.IsKeyDown(Keys.P) && !lastState.IsKeyDown(Keys.P))
-            {
-                if (Server == null)
-                {
-                    Server = new GameServer();
-                    Server.OnClientConnect = new GameServer.Callback(ClientConnects);
-                    Server.OnClientDisconnect = new GameServer.Callback(ClientDisconnects);
-                    Server.OnClientMessage = new GameServer.Callback(ClientMessage);
-                }
-            }
-            if (keyState.IsKeyDown(Keys.C) && !lastState.IsKeyDown(Keys.C))
-            {
-                if (Client == null)
-                {
-                    Client = new Client(new IPEndPoint(IPAddress.Parse(curMessage), 8024));
-                }
-            }
+
             // TODO: Add your update logic here
-            curMessage += KeyboardBuffer.GetText();
-            lastState = keyState;
+            screenManager.Update(gameTime);
             base.Update(gameTime);
         }
 

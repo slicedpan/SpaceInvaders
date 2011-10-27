@@ -11,13 +11,9 @@ namespace SpaceInvaders
 {
     public interface IGameScreen
     {
-        RenderTarget2D RenderTarget
-        {
-            get;
-        }
         void Update(GameTime gameTime);
         void InjectInput(KeyboardState keyboardState, MouseState mouseState);
-        void Draw(GameTime gameTime);
+        void Draw(GameTime gameTime, GraphicsDevice graphicsDevice);
         void Remove();
         void LoadContent(ContentManager contentManager);
     }
