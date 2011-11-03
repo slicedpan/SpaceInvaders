@@ -114,6 +114,7 @@
     <Compile Include="IGameScreen.cs" />
     <Compile Include="KeyboardBuffer.cs" />
     <Compile Include="MenuScreen.cs" />
+    <Compile Include="MessageBox.cs" />
     <Compile Include="MessageHook.cs" />
     <Compile Include="MessageType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="ScreenManager.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="TestScreen.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
