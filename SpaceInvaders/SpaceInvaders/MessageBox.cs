@@ -32,7 +32,7 @@ namespace SpaceInvaders
             }
         }
         public void AddMessage(string message)
-        {
+        {            
             messages.Add(message);
             if (messages.Count > _maxLines)
             {

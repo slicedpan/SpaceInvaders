@@ -25,7 +25,7 @@ namespace SpaceInvaders
         Dictionary<int, ClientInfo> clients;
         KeyboardState lastState;
         public static KeyboardBuffer KeyboardBuffer;
-        public static int width = 800;
+        public static int width = 1600;
         public static int height = 600;
         ScreenManager screenManager;
         public static SpriteFont Font;

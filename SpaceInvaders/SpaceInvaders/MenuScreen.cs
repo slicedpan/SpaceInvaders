@@ -24,6 +24,7 @@ namespace SpaceInvaders
         MessageBox serverBox;
         MessageBox clientBox;
         MessageBox otherStuff;
+        int lastAttempts;
         int mouseX, mouseY;
         int ticks;
 
@@ -39,15 +40,22 @@ namespace SpaceInvaders
         public void Update(GameTime gameTime)
         {
             Game1.KeyboardBuffer.TranslateMessage = true;
-            ip += Game1.KeyboardBuffer.GetText();
-            ticks += gameTime.ElapsedGameTime.Milliseconds;
-            if (ticks > 1000)
+            String newText = Game1.KeyboardBuffer.GetText();
+            if (newText.IndexOf('\b') >= 0)
             {
-                ticks -= 1000;
-                if (clientBox != null)
-                {
-                    clientBox.AddMessage(Game1.Client.Attempts + " attempts" );
-                }
+                if (ip.Length > 0)
+                    ip = ip.Substring(0, ip.Length - 1);
+            }
+            else
+            {
+                ip += newText;
+            }
+            ticks += gameTime.ElapsedGameTime.Milliseconds;
+            if (Game1.Client != null && lastAttempts != Game1.Client.Attempts)
+            {
+                clientBox.AddMessage(Game1.Client.Attempts + " attempts");
+                clientBox.AddMessage("socket message: " + Game1.Client.socketMessage);
+                lastAttempts = Game1.Client.Attempts;
             }
         }        
 
@@ -75,12 +83,13 @@ namespace SpaceInvaders
                     }
                     else
                     {
-                        Game1.Client = new ONet.Client(new IPEndPoint(IPAddress.Loopback, 8024));  
+                        Game1.Client = new ONet.Client(new IPEndPoint(addr, 8024));  
                         Game1.Client.OnConnect = new Client.Callback(ClientConnect);
                         Game1.Client.TryConnect();
                         clientBox = new MessageBox(8, 0, 100);
                         clientBox.AddMessage("Started Client, connecting to : " + ip);
                     }
+                    lastAttempts = 0;
                     ip = "";
                 }
             }
