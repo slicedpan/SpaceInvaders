@@ -123,7 +123,9 @@
     <Compile Include="ScreenManager.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="TestScreen.cs" />
+    <Compile Include="UITex.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="Window.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

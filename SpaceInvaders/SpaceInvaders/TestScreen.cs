@@ -14,7 +14,6 @@ namespace SpaceInvaders
         protected GraphicsDevice GraphicsDevice;
         protected SpriteBatch SpriteBatch;
         protected KeyboardState lastState = new KeyboardState();
-        Texture2D img;
 
         public TestScreen()
         {

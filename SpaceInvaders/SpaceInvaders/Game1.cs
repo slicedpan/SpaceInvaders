@@ -23,13 +23,13 @@ namespace SpaceInvaders
         public static GameServer Server;
         public static Client Client;
         Dictionary<int, ClientInfo> clients;
-        KeyboardState lastState;
         public static KeyboardBuffer KeyboardBuffer;
-        public static int width = 1600;
-        public static int height = 600;
+        public static int width = 1024;
+        public static int height = 768;
         ScreenManager screenManager;
         public static SpriteFont Font;
-        string curMessage = "";
+        public static SpriteFont mbFont;
+        public static UI UITex;
 
         public Game1()
         {
@@ -39,28 +39,9 @@ namespace SpaceInvaders
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
             clients = new Dictionary<int, ClientInfo>();
-            lastState = new KeyboardState();
             KeyboardBuffer = new KeyboardBuffer(this.Window.Handle);
             KeyboardBuffer.TranslateMessage = true;            
-        }
-
-        public void ClientConnects(int clientNumber, GameMessage message)
-        {
-            clients.Add(clientNumber, new ClientInfo(clientNumber, String.Format("client: {0}, addr: {1}", clientNumber, Server.Connections[clientNumber].Socket.RemoteEndPoint.ToString())));            
-        }
-
-        public void ClientDisconnects(int clientNumber, GameMessage message)
-        {
-            clients.Remove(clientNumber);
-        }
-
-        public void ClientMessage(int clientNumber, GameMessage message)
-        {
-            if (message.DataType == MessageType.SetName)
-            {
-
-            }
-        }   
+        }  
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -82,10 +63,14 @@ namespace SpaceInvaders
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
+            UITex = new UI();
+            UITex.LoadContent(Content);
             SpriteBatch = new SpriteBatch(GraphicsDevice);
             screenManager = new ScreenManager(GraphicsDevice, Content);            
             screenManager.SetScreen(new MenuScreen());
             Font = Content.Load<SpriteFont>("Segoe");
+            mbFont = Content.Load<SpriteFont>("text");
+
             // TODO: use this.Content to load your game content here
         }
 

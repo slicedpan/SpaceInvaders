@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace SpaceInvaders
 {
@@ -11,12 +12,33 @@ namespace SpaceInvaders
         List<String> messages;
         int _maxLines;
         int _X, _Y;
+        int _width, _height;
+        Rectangle _rect;
+        Window bgWindow;
         public MessageBox(int lines, int X, int Y)
         {
             messages = new List<string>();
             _maxLines = lines;
             _X = X;
             _Y = Y;
+            _width = 400;
+            _height = lines * 11 + 12;
+            _rect = new Rectangle(_X, _Y, _width, _height);
+            bgWindow = new Window(Color.Red);
+            bgWindow.SetPosition(_X + (_width / 2), _Y + (_height / 2));
+            bgWindow.SetSize(_width, _height);
+        }
+        public MessageBox(Rectangle size)
+        {
+            _X = size.X;
+            _Y = size.Y;
+            _width = size.Width;
+            _height = size.Height;
+            _rect = size;
+            _maxLines = (int)Math.Floor((_height - 12) / 11.0d);
+            bgWindow = new Window(Color.Red);
+            bgWindow.SetPosition(_X, _Y);
+            bgWindow.SetSize(_width, _height);
         }
         public void SpriteDraw()
         {
@@ -24,11 +46,13 @@ namespace SpaceInvaders
             Draw();
             Game1.SpriteBatch.End();
         }
+
         public void Draw()
         {
+            bgWindow.Draw(Game1.SpriteBatch);
             for (int i = 0; i < messages.Count; ++i)
-            {
-                Game1.SpriteBatch.DrawString(Game1.Font, messages[i], new Vector2(_X, _Y + (i * 12)), Color.White);
+            {                
+                Game1.SpriteBatch.DrawString(Game1.mbFont, messages[i], new Vector2(_X + 6, _Y + (i * 11) + 1), Color.White);                
             }
         }
         public void AddMessage(string message)
@@ -38,6 +62,6 @@ namespace SpaceInvaders
             {
                 messages.Remove(messages[0]);
             }   
-        }
+        }            
     }
 }

@@ -24,7 +24,6 @@ namespace SpaceInvaders
         MessageBox serverBox;
         MessageBox clientBox;
         MessageBox otherStuff;
-        int lastAttempts;
         int mouseX, mouseY;
         int ticks;
 
@@ -51,12 +50,6 @@ namespace SpaceInvaders
                 ip += newText;
             }
             ticks += gameTime.ElapsedGameTime.Milliseconds;
-            if (Game1.Client != null && lastAttempts != Game1.Client.Attempts)
-            {
-                clientBox.AddMessage(Game1.Client.Attempts + " attempts");
-                clientBox.AddMessage("socket message: " + Game1.Client.socketMessage);
-                lastAttempts = Game1.Client.Attempts;
-            }
         }        
 
         public void InjectInput(KeyboardState keyboardState, MouseState mouseState)
@@ -71,26 +64,38 @@ namespace SpaceInvaders
                     Game1.Server.OnClientConnect = new GameServer.Callback(ServerClientConnect);
                     Game1.Server.OnClientMessage = new GameServer.Callback(ServerMessage);
                     Game1.Server.OnClientDisconnect = new GameServer.Callback(ServerClientDisconnect);
+                    Game1.Server.OnError = new GameServer.ErrorCallback(ServerError);
+                    Game1.Server.Listen();
                     serverBox = new MessageBox(8, 0, 0);
                     serverBox.AddMessage("Started Server");
                 }
                 else if (Utils.Intersects(mouseX, mouseY, connectRect))
                 {
                     IPAddress addr;
-                    if (!IPAddress.TryParse(ip, out addr))
+                    if (Game1.Client != null && Game1.Client.Connected)
                     {
-                        otherStuff.AddMessage("Incorrect IP address");
+                        Game1.Client.Disconnect("just wanted to");
                     }
                     else
                     {
-                        Game1.Client = new ONet.Client(new IPEndPoint(addr, 8024));  
-                        Game1.Client.OnConnect = new Client.Callback(ClientConnect);
-                        Game1.Client.TryConnect();
-                        clientBox = new MessageBox(8, 0, 100);
-                        clientBox.AddMessage("Started Client, connecting to : " + ip);
+                        if (ip == "")
+                            ip = "127.0.0.1";
+                        if (!IPAddress.TryParse(ip, out addr))
+                        {
+                            otherStuff.AddMessage("Incorrect IP address");
+                        }
+                        else  
+                        {
+                            Game1.Client = new ONet.Client(new IPEndPoint(addr, 8024));
+                            Game1.Client.OnConnect = new Client.Callback(ClientConnect);
+                            Game1.Client.OnError = new Client.ErrorCallback(ClientError);
+                            Game1.Client.OnDisconnect = new Client.Callback(ClientDisconnect);
+                            Game1.Client.TryConnect();
+                            clientBox = new MessageBox(8, 0, 100);
+                            clientBox.AddMessage("Started Client, connecting to : " + ip);
+                        }
+                        ip = "";
                     }
-                    lastAttempts = 0;
-                    ip = "";
                 }
             }
 
@@ -104,8 +109,7 @@ namespace SpaceInvaders
             Game1.SpriteBatch.Begin();
             Game1.SpriteBatch.Draw(serverButton, serverRect, Color.White);
             Game1.SpriteBatch.Draw(connectButton, connectRect, Color.White);
-            Game1.SpriteBatch.Draw(cursorImg, new Rectangle(mouseX, mouseY, 18, 16), Color.White); 
-            Game1.SpriteBatch.DrawString(Game1.Font, ip, new Vector2(400, 0), Color.White);
+            Game1.SpriteBatch.Draw(cursorImg, new Rectangle(mouseX, mouseY, 18, 16), Color.White);             
             if (clientBox != null)
             {
                 clientBox.Draw();
@@ -115,6 +119,7 @@ namespace SpaceInvaders
                 serverBox.Draw();
             }
             otherStuff.Draw();
+            Game1.SpriteBatch.DrawString(Game1.Font, ip, new Vector2(400, 0), Color.White);
             Game1.SpriteBatch.End();
         }
 
@@ -139,12 +144,24 @@ namespace SpaceInvaders
             serverBox.AddMessage("Client connected, client number: " + clientNumber);
         }
         public void ServerClientDisconnect(int clientNumber, GameMessage message)
-        {
-
+        {            
+            serverBox.AddMessage(String.Format("Client {0} disconnected: {1}", clientNumber, message.messageAsString()));
         }
         public void ClientConnect(GameMessage message)
         {
             clientBox.AddMessage("Connected");
+        }
+        public void ClientDisconnect(GameMessage message)
+        {
+            clientBox.AddMessage(String.Format("Disconnected: {0}", message.messageAsString()));            
+        }
+        public void ClientError(string message)
+        {
+            clientBox.AddMessage(message);
+        }
+        public void ServerError(string message)
+        {
+            serverBox.AddMessage(message);
         }
     }
 }
