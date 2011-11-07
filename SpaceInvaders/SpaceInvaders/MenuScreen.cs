@@ -22,8 +22,7 @@ namespace SpaceInvaders
         Rectangle serverRect;
         Rectangle connectRect;
         MessageBox serverBox;
-        MessageBox clientBox;
-        MessageBox otherStuff;
+        MessageBox clientBox;        
         int mouseX, mouseY;
         int ticks;
 
@@ -32,9 +31,8 @@ namespace SpaceInvaders
             lastState = new KeyboardState();
             lastMouseState = new MouseState();
             Game1.KeyboardBuffer.Enabled = true;
-            serverRect = new Rectangle(340, 500, 120, 50);
-            connectRect = new Rectangle(340, 400, 120, 50);
-            otherStuff = new MessageBox(8, 400, 12);
+            serverRect = new Rectangle(50, 668, 120, 50);
+            connectRect = new Rectangle(Game1.width - 170, 668, 120, 50);            
         }
         public void Update(GameTime gameTime)
         {
@@ -82,7 +80,7 @@ namespace SpaceInvaders
                             ip = "127.0.0.1";
                         if (!IPAddress.TryParse(ip, out addr))
                         {
-                            otherStuff.AddMessage("Incorrect IP address");
+                            clientBox.AddMessage("Incorrect IP address");
                         }
                         else  
                         {
@@ -90,8 +88,9 @@ namespace SpaceInvaders
                             Game1.Client.OnConnect = new Client.Callback(ClientConnect);
                             Game1.Client.OnError = new Client.ErrorCallback(ClientError);
                             Game1.Client.OnDisconnect = new Client.Callback(ClientDisconnect);
+                            Game1.Client.OnMessage = new Client.Callback(ClientMessage);
                             Game1.Client.TryConnect();
-                            clientBox = new MessageBox(8, 0, 100);
+                            clientBox = new MessageBox(8, Game1.width - 400, 0);
                             clientBox.AddMessage("Started Client, connecting to : " + ip);
                         }
                         ip = "";
@@ -117,8 +116,7 @@ namespace SpaceInvaders
             if (serverBox != null)
             {
                 serverBox.Draw();
-            }
-            otherStuff.Draw();
+            }            
             Game1.SpriteBatch.DrawString(Game1.Font, ip, new Vector2(400, 0), Color.White);
             Game1.SpriteBatch.End();
         }
@@ -162,6 +160,10 @@ namespace SpaceInvaders
         public void ServerError(string message)
         {
             serverBox.AddMessage(message);
+        }
+        public void ClientMessage(GameMessage message)
+        {
+
         }
     }
 }

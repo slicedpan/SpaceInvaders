@@ -14,6 +14,7 @@ namespace SpaceInvaders
         public Texture2D sideBorder;
         public Texture2D topbotBorder;
         public Texture2D tlCorner;
+        public Texture2D blCorner;
 
         public void LoadContent(ContentManager Content)
         {
@@ -21,11 +22,7 @@ namespace SpaceInvaders
             sideBorder = Content.Load<Texture2D>("sideborder");
             topbotBorder = Content.Load<Texture2D>("topbotborder");
             tlCorner = Content.Load<Texture2D>("tlcorner");
-        }
-        public List<Rectangle> GetBoundingRects(Rectangle size)
-        {
-            List<Rectangle> retList = new List<Rectangle>();
-            return retList;
+            blCorner = Content.Load<Texture2D>("blcorner");
         }
     }
 }

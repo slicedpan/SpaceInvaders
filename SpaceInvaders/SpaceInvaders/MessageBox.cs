@@ -22,9 +22,9 @@ namespace SpaceInvaders
             _X = X;
             _Y = Y;
             _width = 400;
-            _height = lines * 11 + 12;
+            _height = lines * 11 + 16;
             _rect = new Rectangle(_X, _Y, _width, _height);
-            bgWindow = new Window(Color.Red);
+            bgWindow = new Window(new Color(255, 35, 0));
             bgWindow.SetPosition(_X + (_width / 2), _Y + (_height / 2));
             bgWindow.SetSize(_width, _height);
         }
@@ -35,8 +35,8 @@ namespace SpaceInvaders
             _width = size.Width;
             _height = size.Height;
             _rect = size;
-            _maxLines = (int)Math.Floor((_height - 12) / 11.0d);
-            bgWindow = new Window(Color.Red);
+            _maxLines = (int)Math.Floor((_height - 16) / 11.0d);
+            bgWindow = new Window(new Color(255, 35, 0));
             bgWindow.SetPosition(_X, _Y);
             bgWindow.SetSize(_width, _height);
         }
@@ -52,7 +52,7 @@ namespace SpaceInvaders
             bgWindow.Draw(Game1.SpriteBatch);
             for (int i = 0; i < messages.Count; ++i)
             {                
-                Game1.SpriteBatch.DrawString(Game1.mbFont, messages[i], new Vector2(_X + 6, _Y + (i * 11) + 1), Color.White);                
+                Game1.SpriteBatch.DrawString(Game1.mbFont, messages[i], new Vector2(_X + 8, _Y + (i * 11) + 3), Color.White);                
             }
         }
         public void AddMessage(string message)

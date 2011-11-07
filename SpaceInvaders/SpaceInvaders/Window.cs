@@ -25,7 +25,7 @@ namespace SpaceInvaders
             borderBottom = Game1.UITex.topbotBorder;
             borderTop = Game1.UITex.topbotBorder;
             borderLeft = Game1.UITex.sideBorder;
-            cornerBottom = Game1.UITex.tlCorner;
+            cornerBottom = Game1.UITex.blCorner;
             cornerTop = Game1.UITex.tlCorner;
             background = Game1.UITex.background;
         }
