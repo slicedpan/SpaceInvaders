@@ -28,6 +28,10 @@ namespace SpaceInvaders
                 length += 6;
                 length += message.MessageSize;
             }
+            while (length < 1300)
+            {                
+                
+            }
             array = new byte[length];
             length = 0;
             foreach (GameMessage message in messages)
