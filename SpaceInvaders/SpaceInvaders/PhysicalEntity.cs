@@ -49,5 +49,9 @@ namespace SpaceInvaders
                 return id;
             }
         }
+        public virtual GameMessage GetStateMessage()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
