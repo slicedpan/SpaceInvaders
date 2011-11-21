@@ -17,5 +17,6 @@ namespace SpaceInvaders
         int ID { get; }
         void HandleMessage(GameMessage message);
         GameMessage GetStateMessage();
+        int typeID { get; }
     }
 }

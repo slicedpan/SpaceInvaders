@@ -120,6 +120,8 @@
     <Compile Include="MessageHook.cs" />
     <Compile Include="MessageType.cs" />
     <Compile Include="PhysicalEntity.cs" />
+    <Compile Include="PlayerInfo.cs" />
+    <Compile Include="PlayerShip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
