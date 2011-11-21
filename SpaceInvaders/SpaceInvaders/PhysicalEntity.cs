@@ -4,14 +4,18 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using ONet;
 
 namespace SpaceInvaders
 {
-    class PhysicalEntity : IEntity
+    public class PhysicalEntity : IEntity
     {
-        public Vector2 Position;
-        public float Angle;
-        public Vector2 Velocity;
+        public Vector2 Position = Vector2.Zero;
+        public float Angle = 0.0f;
+        public Vector2 Velocity = Vector2.Zero;
+        public float mass = 1.0f;
+        int id;
+
         public void Update(GameTime gameTime)
         {
             Position += Velocity;
@@ -29,7 +33,21 @@ namespace SpaceInvaders
 
         public virtual BoundingSphere BoundingSphere
         {
-            get { throw new NotImplementedException(); }
+            get 
+            {  
+                return new BoundingSphere(Vector3.Zero, 1.0f);
+            }
+        }
+        public virtual void HandleMessage(GameMessage message)
+        {
+            
+        }
+        public virtual int ID
+        {
+            get
+            {
+                return id;
+            }
         }
     }
 }

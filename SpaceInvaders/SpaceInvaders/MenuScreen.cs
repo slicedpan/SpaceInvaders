@@ -73,6 +73,7 @@ namespace SpaceInvaders
                     if (Game1.Client != null && Game1.Client.Connected)
                     {
                         Game1.Client.Disconnect("just wanted to");
+                        Game1.Client.Dispose();
                     }
                     else
                     {

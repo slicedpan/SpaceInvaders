@@ -124,6 +124,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="ScreenManager.cs" />
+    <Compile Include="GameState.cs" />
     <Compile Include="ServerState.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="TestScreen.cs" />
