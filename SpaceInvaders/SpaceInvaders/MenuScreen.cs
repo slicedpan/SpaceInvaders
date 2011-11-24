@@ -58,14 +58,16 @@ namespace SpaceInvaders
             {
                 if (Utils.Intersects(mouseX, mouseY, serverRect))
                 {
-                    Game1.Server = new ONet.GameServer();
-                    Game1.Server.OnClientConnect = new GameServer.Callback(ServerClientConnect);
-                    Game1.Server.OnClientMessage = new GameServer.Callback(ServerMessage);
-                    Game1.Server.OnClientDisconnect = new GameServer.Callback(ServerClientDisconnect);
-                    Game1.Server.OnError = new GameServer.ErrorCallback(ServerError);
-                    Game1.Server.Listen();
                     serverBox = new MessageBox(8, 0, 0);
                     serverBox.AddMessage("Started Server");
+                    ServerState serverState = new ServerState();
+                    serverState.msgBox = serverBox;
+                    Game1.Server = new ONet.GameServer();
+                    Game1.Server.OnClientConnect = new GameServer.Callback(serverState.ClientConnect);
+                    Game1.Server.OnClientMessage = new GameServer.Callback(serverState.Message);
+                    Game1.Server.OnClientDisconnect = new GameServer.Callback(serverState.ClientDisconnect);
+                    Game1.Server.OnError = new GameServer.ErrorCallback(ServerError);
+                    Game1.Server.Listen();                    
                 }
                 else if (Utils.Intersects(mouseX, mouseY, connectRect))
                 {
@@ -132,18 +134,7 @@ namespace SpaceInvaders
             cursorImg = contentManager.Load<Texture2D>("cursor");
         }
 
-        public void ServerMessage(int clientNumber, GameMessage message)
-        {
-
-        }
-        public void ServerClientConnect(int clientNumber, GameMessage message)
-        {
-            serverBox.AddMessage("Client connected, client number: " + clientNumber);
-        }
-        public void ServerClientDisconnect(int clientNumber, GameMessage message)
-        {            
-            serverBox.AddMessage(String.Format("Client {0} disconnected: {1}", clientNumber, message.messageAsString()));
-        }
+        
         public void ClientConnect(GameMessage message)
         {
             ScreenManager.currentInstance.Switch(new ClientScreen());

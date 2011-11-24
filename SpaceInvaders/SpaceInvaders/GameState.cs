@@ -19,18 +19,33 @@ namespace SpaceInvaders
         protected Dictionary<int, IEntity> entities;
         protected List<PhysicalEntity> physicalEntities;
 
-        public virtual void AddEntity(IEntity entityToAdd)
+        ushort counter = 0;
+
+        public void AddTestEntities()
         {
-            entities.Add(entityToAdd.ID, entityToAdd);
+
+        }
+
+        public virtual void AddEntity(int ID, IEntity entityToAdd)
+        {
+            entities.Add(ID, entityToAdd);
             if (entityToAdd is PhysicalEntity)
                 physicalEntities.Add(entityToAdd as PhysicalEntity);
+        }
+        public virtual int AddEntity(IEntity entityToAdd)
+        {
+            entities.Add(counter, entityToAdd);
+            ++counter;
+            if (entityToAdd is PhysicalEntity)
+                physicalEntities.Add(entityToAdd as PhysicalEntity);
+            return counter - 1;   
         }
         public virtual void Update(GameTime gameTime)
         {
             foreach (IEntity entity in entities.Values)
             {
                 entity.Update(gameTime);
-            }
+            }            
         }
         public GameState()
         {
@@ -55,6 +70,18 @@ namespace SpaceInvaders
             {
                 entities[message.index].HandleMessage(message);
             }
+        }
+        public static GameMessage SpawnMessage(int entityType, int entityID, Vector2 position)
+        {
+            GameMessage msg = new GameMessage();
+            msg.DataType = 2;
+            msg.index = GameState.SpawnEntity;
+            byte[] array = new byte[12];
+            BitConverter.GetBytes(entityID).CopyTo(array, 0);
+            BitConverter.GetBytes(position.X).CopyTo(array, 4);
+            BitConverter.GetBytes(position.Y).CopyTo(array, 8);
+            msg.SetMessage(array);
+            return msg;
         }
     }
 }

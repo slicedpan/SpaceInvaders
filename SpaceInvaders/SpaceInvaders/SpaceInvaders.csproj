@@ -126,8 +126,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
+    <Compile Include="QuadRenderer.cs" />
     <Compile Include="ScreenManager.cs" />
     <Compile Include="GameState.cs" />
+    <Compile Include="ServerScreen.cs" />
     <Compile Include="ServerState.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="TestScreen.cs" />

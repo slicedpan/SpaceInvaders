@@ -16,18 +16,28 @@ namespace SpaceInvaders
         double counter = 0.0d;
         const double updatesPerSec = 20.0d;
         Dictionary<int, PlayerInfo> playerInfo;
+        public static ServerState currentInstance;
+        public MessageBox msgBox;
 
         public ServerState()
         {
+            if (currentInstance == null)
+            {
+                currentInstance = this;
+            }
+            else
+            {
+                throw new Exception("only one instance of ServerState is allowed");
+            }
             messages = new List<GameMessage>();
             flatList = new List<IEntity>();
             playerInfo= new Dictionary<int, PlayerInfo>();
             currentEntity = 0;
         }
-        public override void AddEntity(IEntity entityToAdd)
+        public override int AddEntity(IEntity entityToAdd)
         {
             flatList.Add(entityToAdd);
-            base.AddEntity(entityToAdd);
+            return base.AddEntity(entityToAdd);
         }
         public override void Update(GameTime gameTime)
         {
@@ -72,6 +82,31 @@ namespace SpaceInvaders
             bundle.DataType = GameMessage.Bundle;
             bundle.MessageSize = (ushort)array.Length;
             CurrentBundle = bundle;
+        }
+        public void Reset()
+        {
+            foreach (IEntity entity in entities.Values)
+            {
+                // dispose of entity
+            }
+            entities.Clear();
+            flatList.Clear();
+        }
+        public void Message(int clientNumber, GameMessage message)
+        {
+
+        }
+        public void ClientConnect(int clientNumber, GameMessage message)
+        {
+            if (msgBox != null)
+                msgBox.AddMessage("Client connected, client number: " + clientNumber);
+            int id = AddEntity(new PlayerShip());
+            Game1.Server.Connections[clientNumber].Send(GameState.SpawnMessage(1, id, new Vector2(512, 700)));
+        }
+        public void ClientDisconnect(int clientNumber, GameMessage message)
+        {
+            if (msgBox != null)
+                msgBox.AddMessage(String.Format("Client {0} disconnected: {1}", clientNumber, message.messageAsString()));
         }
     }
 }

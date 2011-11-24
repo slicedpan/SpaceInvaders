@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Content;
 
 namespace SpaceInvaders
 {
-    class MessageBox
+    public class MessageBox
     {
         List<String> messages;
         int _maxLines;
@@ -49,10 +49,13 @@ namespace SpaceInvaders
 
         public void Draw()
         {
-            bgWindow.Draw(Game1.SpriteBatch);
-            for (int i = 0; i < messages.Count; ++i)
-            {                
-                Game1.SpriteBatch.DrawString(Game1.mbFont, messages[i], new Vector2(_X + 8, _Y + (i * 11) + 3), Color.White);                
+            if (IsVisible)
+            {
+                bgWindow.Draw(Game1.SpriteBatch);
+                for (int i = 0; i < messages.Count; ++i)
+                {
+                    Game1.SpriteBatch.DrawString(Game1.mbFont, messages[i], new Vector2(_X + 8, _Y + (i * 11) + 3), Color.White);
+                }
             }
         }
         public void AddMessage(string message)
@@ -62,6 +65,7 @@ namespace SpaceInvaders
             {
                 messages.Remove(messages[0]);
             }   
-        }            
+        }
+        public bool IsVisible = true;    
     }
 }

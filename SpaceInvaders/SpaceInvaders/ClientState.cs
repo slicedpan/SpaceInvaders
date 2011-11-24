@@ -13,6 +13,14 @@ namespace SpaceInvaders
         int health;
         int score;
         PlayerShip ship;
+        int playerIndex = -1;
+        public MessageBox errorBox;
+
+        public void ServerError(GameMessage message)
+        {
+            if (errorBox != null)
+                errorBox.AddMessage(message.messageAsString());
+        }
 
         public ClientState()
         {
@@ -25,6 +33,17 @@ namespace SpaceInvaders
                 entity.Draw(gameTime);
             }
         }
+        public override void Update(GameTime gameTime)
+        {
+            if (ship == null)
+            {
+                if (playerIndex >= 0)
+                {
+                    ship = entities[playerIndex] as PlayerShip;
+                }
+            }
+            base.Update(gameTime);
+        }
         public void InjectInput(KeyboardState keyboardState, MouseState mouseState)
         {
             if (ship != null)
@@ -35,7 +54,7 @@ namespace SpaceInvaders
         public void ServerMessage(GameMessage message)
         {
             if (message.DataType == GameMessage.Bundle || message.DataType == 1)
-                HandleEntityUpdates(message);
+                HandleEntityUpdates(message);            
             else if (message.DataType == 2)
             {
                 switch (message.index)
@@ -45,9 +64,6 @@ namespace SpaceInvaders
                         break;
                     case HealthUpdate:
                         health = BitConverter.ToInt32(message.Message, 0);
-                        break;
-                    case SpawnShip:
-                        ship = entities[BitConverter.ToInt32(message.Message, 0)] as PlayerShip;
                         break;
                     case SpawnEntity:
                         Spawn(BitConverter.ToInt32(message.Message, 0), new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
@@ -60,6 +76,10 @@ namespace SpaceInvaders
             switch (p)
             {
                 case 1:
+                    ship = new PlayerShip();
+                    ship.Position = position;
+                    playerIndex = p;
+                    AddEntity(p, ship);                    
                     break;
                 case 2:
                     break;
