@@ -106,12 +106,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Compile Include="background.jpg">
       <Name>background</Name>
+=======
+    <Compile Include="playersprite.png">
+      <Name>playersprite</Name>
+>>>>>>> github/master
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
   </ItemGroup>
+<<<<<<< HEAD
   <ItemGroup />
   <ItemGroup>
     <Compile Include="shaders\texdraw.fx">
@@ -120,6 +126,8 @@
       <Processor>EffectProcessor</Processor>
     </Compile>
   </ItemGroup>
+=======
+>>>>>>> github/master
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
