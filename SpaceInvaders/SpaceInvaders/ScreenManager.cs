@@ -56,6 +56,7 @@ namespace SpaceInvaders
                 currentScreen.Draw(gameTime, GraphicsDevice);
                 GraphicsDevice.SetRenderTarget(oldRenderTarget);
                 lastScreen.Draw(gameTime, GraphicsDevice);
+                GraphicsDevice.SetRenderTarget(null);
                 SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
                 SpriteBatch.Draw(newRenderTarget, new Vector2(0.0f, 0.0f), new Color(1.0f, 1.0f, 1.0f, currentAlpha));
                 SpriteBatch.Draw(oldRenderTarget, new Vector2(0.0f, 0.0f), new Color(1.0f, 1.0f, 1.0f, lastAlpha));

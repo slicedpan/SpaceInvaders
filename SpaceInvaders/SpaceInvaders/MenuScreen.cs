@@ -88,8 +88,6 @@ namespace SpaceInvaders
                             Game1.Client = new ONet.Client(new IPEndPoint(addr, 8024));
                             Game1.Client.OnConnect = new Client.Callback(ClientConnect);
                             Game1.Client.OnError = new Client.ErrorCallback(ClientError);
-                            Game1.Client.OnDisconnect = new Client.Callback(ClientDisconnect);
-                            Game1.Client.OnMessage = new Client.Callback(ClientMessage);
                             Game1.Client.TryConnect();
                             clientBox = new MessageBox(8, Game1.width - 400, 0);
                             clientBox.AddMessage("Started Client, connecting to : " + ip);
@@ -148,6 +146,7 @@ namespace SpaceInvaders
         }
         public void ClientConnect(GameMessage message)
         {
+            ScreenManager.currentInstance.Switch(new ClientScreen());
             clientBox.AddMessage("Connected");
         }
         public void ClientDisconnect(GameMessage message)
