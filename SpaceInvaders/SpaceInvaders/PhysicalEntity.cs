@@ -14,7 +14,15 @@ namespace SpaceInvaders
         public float Angle = 0.0f;
         public Vector2 Velocity = Vector2.Zero;
         public float mass = 1.0f;
-        int id;
+        int id = 0;
+
+        public virtual int typeID
+        {
+            get
+            {
+                throw new Exception("no type id");
+            }
+        }
 
         public void Update(GameTime gameTime)
         {
@@ -34,7 +42,7 @@ namespace SpaceInvaders
         public virtual BoundingSphere BoundingSphere
         {
             get 
-            {  
+            {                  
                 return new BoundingSphere(Vector3.Zero, 1.0f);
             }
         }
