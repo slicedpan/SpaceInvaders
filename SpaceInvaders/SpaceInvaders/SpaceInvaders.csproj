@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClientInfo.cs" />
+    <Compile Include="ClientScreen.cs" />
     <Compile Include="ClientState.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="IGameScreen.cs" />
