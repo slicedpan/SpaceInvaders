@@ -31,13 +31,13 @@ namespace SpaceInvaders
         public void InjectInput(KeyboardState ks, MouseState ms)
         {
             if (ks.IsKeyDown(Keys.D))
-                Position.X += 2.0f;
+                _position.X += 2.0f;
             else if (ks.IsKeyDown(Keys.A))
-                Position.X -= 2.0f;
+                _position.X -= 2.0f;
             if (ks.IsKeyDown(Keys.W))
-                Position.Y -= 2.0f;
+                _position.Y -= 2.0f;
             else if (ks.IsKeyDown(Keys.S))
-                Position.Y += 2.0f;
+                _position.Y += 2.0f;
         }
         public override void HandleMessage(GameMessage message)
         {
