@@ -116,9 +116,17 @@ namespace SpaceInvaders
                 secondCounter = 0.0d;
             }
             GameMessage message;
+            
             while (_messageStack.Pop(out message))
             {
-                HandleEntityUpdates(message);
+                if (message == null)
+                {
+
+                }
+                else
+                {
+                    HandleEntityUpdates(message);
+                }
             }
             base.Update(gameTime);
         }
