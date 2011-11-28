@@ -91,8 +91,15 @@ namespace SpaceInvaders
         {
             updateCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
             secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
+
+           
+
             if (updateCounter > (1.0d / updatesPerSec))
             {
+                foreach (IEntity entity in entities.Values)
+                {
+                    messages.Add(entity.GetStateMessage());
+                }
                 if (messages.Count > 0)
                 {
                     if (messages.Count == 1)
@@ -135,6 +142,7 @@ namespace SpaceInvaders
                     }
                 }
             }
+            
             base.Update(gameTime);
         }
         public void PopulateMessageBundle()
