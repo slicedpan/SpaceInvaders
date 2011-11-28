@@ -97,6 +97,7 @@ namespace SpaceInvaders
             keyState = Keyboard.GetState();
             if (keyState.IsKeyDown(Keys.Escape))
             {
+                ClientState.currentInstance.Client.Disconnect("Player quit");
                 this.Exit();
             }
 
