@@ -41,21 +41,22 @@ namespace SpaceInvaders
         }
         public override void HandleMessage(GameMessage message)
         {
-            
+            Position = new Vector2(BitConverter.ToSingle(message.Message, 0), BitConverter.ToSingle(message.Message, 4));
+            Velocity = new Vector2(BitConverter.ToSingle(message.Message, 8), BitConverter.ToSingle(message.Message, 12));
+            Angle = BitConverter.ToSingle(message.Message, 16);
         }
         public override GameMessage GetStateMessage()
         {
             GameMessage msg = new GameMessage();
             msg.DataType = GameState.DataTypeEntityUpdate;
-            msg.index = 0;
-            byte[] array = new byte[26];
-            BitConverter.GetBytes(GameState.DataTypeEntityUpdate);            
+            msg.index = (ushort)ID;
+            byte[] array = new byte[20];           
             BitConverter.GetBytes(Position.X).CopyTo(array, 0);
             BitConverter.GetBytes(Position.Y).CopyTo(array, 4);
             BitConverter.GetBytes(Velocity.X).CopyTo(array, 8);
             BitConverter.GetBytes(Velocity.Y).CopyTo(array, 12);
             BitConverter.GetBytes(Angle).CopyTo(array, 16);
-            msg.fromBytes(array);
+            msg.SetMessage(array);
             return msg;
         }
     }

@@ -14,7 +14,7 @@ namespace SpaceInvaders
         void LoadContent(ContentManager Content);
         void Draw(GameTime gameTime);
         BoundingSphere BoundingSphere { get; }
-        int ID { get; }
+        int ID { get; set; }
         void HandleMessage(GameMessage message);
         GameMessage GetStateMessage();
         int typeID { get; }

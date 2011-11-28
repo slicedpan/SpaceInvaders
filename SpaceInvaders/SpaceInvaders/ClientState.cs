@@ -111,12 +111,18 @@ namespace SpaceInvaders
                     ship = entities[playerIndex] as PlayerShip;
                 }
             }
+            
             GameMessage msg;
             while (_messageStack.Pop(out msg))
             {
                 HandleMessage(msg);
             }
             base.Update(gameTime);
+
+            foreach (IEntity entity in entities.Values)
+            {
+                _client.Send(entity.GetStateMessage());
+            }            
         }
 
         public override void AddEntity(int ID, IEntity entityToAdd)

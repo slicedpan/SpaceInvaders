@@ -37,7 +37,7 @@ namespace SpaceInvaders
 
         public void Update(GameTime gameTime)
         {
-            Position += Velocity;
+            _position += Velocity;
         }
 
         public virtual void LoadContent(ContentManager Content)
@@ -61,11 +61,15 @@ namespace SpaceInvaders
         {
             
         }
-        public virtual int ID
+        public int ID
         {
             get
             {
                 return id;
+            }
+            set
+            {
+                id = value;
             }
         }
         public virtual GameMessage GetStateMessage()

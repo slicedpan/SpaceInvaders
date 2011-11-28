@@ -32,6 +32,7 @@ namespace SpaceInvaders
         public virtual void AddEntity(int ID, IEntity entityToAdd)
         {            
             entities.Add(ID, entityToAdd);
+            entityToAdd.ID = ID;
             if (entityToAdd is PhysicalEntity)
                 physicalEntities.Add(entityToAdd as PhysicalEntity);
         }
