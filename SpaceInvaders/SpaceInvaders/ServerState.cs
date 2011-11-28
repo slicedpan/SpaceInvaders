@@ -156,7 +156,13 @@ namespace SpaceInvaders
 
             foreach (IEntity entity in entities.Values)
             {
-                _server.Send(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                _server.Connections[clientNumber].Send(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+            }
+
+            foreach (KeyValuePair<int, Connection> kvp in _server.Connections)
+            {
+                if (kvp.Key != clientNumber)
+                    kvp.Value.Send(GameState.SpawnMessage(0, clientShipIndex, ship.Position));
             }
 
             GameMessage initMessage = new GameMessage();
