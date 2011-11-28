@@ -93,8 +93,18 @@ namespace SpaceInvaders
             secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
             if (updateCounter > (1.0d / updatesPerSec))
             {
-                //PopulateMessageBundle();
-                //_server.Send(CurrentBundle);
+                if (messages.Count > 0)
+                {
+                    if (messages.Count == 1)
+                    {
+                        _server.Send(messages[0]);
+                    }
+                    else
+                    {
+                        PopulateMessageBundle();
+                        _server.Send(CurrentBundle);
+                    }
+                }
                 updateCounter = 0.0d;
             }
             if (secondCounter > 1000.0d)
@@ -117,6 +127,7 @@ namespace SpaceInvaders
             byte[] array;
             int length = 0;
             int updateCount = 0;
+
             foreach (GameMessage message in messages)
             {
                 length += 6;
