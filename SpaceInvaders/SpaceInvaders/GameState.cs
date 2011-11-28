@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using ONet;
+using Microsoft.Xna.Framework.Content;
 
 namespace SpaceInvaders
 {
@@ -21,6 +22,10 @@ namespace SpaceInvaders
 
         protected Dictionary<int, IEntity> entities;
         protected List<PhysicalEntity> physicalEntities;
+
+        protected ContentManager _contentManager;
+
+
 
         ushort counter = 0;
 
@@ -54,6 +59,15 @@ namespace SpaceInvaders
             entities = new Dictionary<int, IEntity>();
             physicalEntities = new List<PhysicalEntity>();
         }
+
+        public void Draw(GameTime gameTime)
+        {
+            foreach (IEntity entity in entities.Values)
+            {
+                entity.Draw(gameTime);
+            }
+        }
+
         public void HandleEntityUpdates(GameMessage message)
         {
             if (message.DataType == GameMessage.Bundle)

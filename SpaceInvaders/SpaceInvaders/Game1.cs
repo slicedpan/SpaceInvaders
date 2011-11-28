@@ -102,6 +102,7 @@ namespace SpaceInvaders
 
             // TODO: Add your update logic here
             screenManager.Update(gameTime);
+            ServerState.currentInstance.Update(gameTime);
             base.Update(gameTime);
         }
 

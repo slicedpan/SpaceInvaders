@@ -13,7 +13,8 @@ namespace SpaceInvaders
         List<IEntity> flatList;
         List<GameMessage> messages;
         public GameMessage CurrentBundle;
-        double counter = 0.0d;
+        double updateCounter = 0.0d;
+        double secondCounter = 0.0d;
         const double updatesPerSec = 20.0d;
         Dictionary<int, PlayerInfo> playerInfo;
         public static ServerState currentInstance;
@@ -88,12 +89,26 @@ namespace SpaceInvaders
         }
         public override void Update(GameTime gameTime)
         {
-            counter += gameTime.ElapsedGameTime.TotalMilliseconds;
-            if (counter > (1.0d / updatesPerSec))
+            updateCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
+            secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (updateCounter > (1.0d / updatesPerSec))
             {
-                PopulateMessageBundle();
-                _server.Send(CurrentBundle);
-                counter = 0.0d;
+                //PopulateMessageBundle();
+                //_server.Send(CurrentBundle);
+                updateCounter = 0.0d;
+            }
+            if (secondCounter > 1000.0d)
+            {
+                foreach (IEntity entity in entities.Values)
+                {
+                    _infoStack.Push(String.Format("Entity {0}, position {1}", entity.ID, entity.Position));
+                }
+                secondCounter = 0.0d;
+            }
+            GameMessage message;
+            while (_messageStack.Pop(out message))
+            {
+                HandleEntityUpdates(message);
             }
             base.Update(gameTime);
         }
@@ -125,10 +140,10 @@ namespace SpaceInvaders
                 length += 6;
                 length += message.MessageSize;
             }
-            GameMessage bundle = new GameMessage(array);
+            GameMessage bundle = new GameMessage();
             bundle.index = (ushort)messages.Count;
             bundle.DataType = GameMessage.Bundle;
-            bundle.MessageSize = (ushort)array.Length;
+            bundle.SetMessage(array);
             CurrentBundle = bundle;
         }
         public void Reset()

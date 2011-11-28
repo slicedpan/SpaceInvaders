@@ -21,7 +21,6 @@ namespace SpaceInvaders
         MessageStack<GameMessage> _messageStack;
         MessageStack<String> _errorStack;
         MessageStack<String> _infoStack;
-        ContentManager _contentManager;
 
         #region accessors
 
@@ -74,11 +73,6 @@ namespace SpaceInvaders
             _infoStack.Push(String.Format("Disconnected from server: {0}", message.messageAsString()));
         }
 
-        public void LoadContent(ContentManager cm)
-        {
-            _contentManager = cm;
-        }
-
         public ClientState()
         {
             _client = new Client();
@@ -95,13 +89,7 @@ namespace SpaceInvaders
             else
                 throw new Exception("only one instance of client state allowed");
         }
-        public void Draw(GameTime gameTime)
-        {
-            foreach (IEntity entity in entities.Values)
-            {
-                entity.Draw(gameTime);
-            }
-        }
+        
         public override void Update(GameTime gameTime)
         {
             if (ship == null)
@@ -129,6 +117,11 @@ namespace SpaceInvaders
         {
             entityToAdd.LoadContent(_contentManager);
             base.AddEntity(ID, entityToAdd);
+        }
+
+        public void LoadContent(ContentManager cm)
+        {
+            _contentManager = cm;
         }
 
         public void InjectInput(KeyboardState keyboardState, MouseState mouseState)

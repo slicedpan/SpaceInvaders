@@ -17,33 +17,52 @@ namespace SpaceInvaders
         QuadRenderer qR;
         Effect texDraw;
         ClientState clientState;
-        MessageBox errorBox;
+        MessageBox clientBox;
+        MessageBox serverBox;
+        KeyboardState lastState = new KeyboardState();
 
         public ClientScreen()
         {
             qR = new QuadRenderer();
-            errorBox = new MessageBox(10, 0, 0);
-            errorBox.IsVisible = false;
+            clientBox = new MessageBox(10, 0, 0);
+            serverBox = new MessageBox(10, 624, 0);
+            serverBox.IsVisible = false;
+            clientBox.IsVisible = false; 
             clientState = ClientState.currentInstance;            
         }
 
         public void Update(GameTime gameTime)
         {
-            clientState.Update(gameTime);
+            clientState.Update(gameTime);            
             String clientTextMessage;
             while (clientState.InfoStack.Pop(out clientTextMessage))
             {
-                errorBox.AddMessage(clientTextMessage);
+                clientBox.AddMessage(clientTextMessage);
             }
             while (clientState.ErrorStack.Pop(out clientTextMessage))
             {
-                errorBox.AddMessage(clientTextMessage);
+                clientBox.AddMessage(clientTextMessage);
+            }
+            while (ServerState.currentInstance.InfoStack.Pop(out clientTextMessage))
+            {
+                serverBox.AddMessage(clientTextMessage);
+            }
+            while (ServerState.currentInstance.ErrorStack.Pop(out clientTextMessage))
+            {
+                serverBox.AddMessage(clientTextMessage);
             }
         }
 
         public void InjectInput(KeyboardState keyboardState, MouseState mouseState)
         {
+            if (keyboardState.IsKeyDown(Keys.Q) && !lastState.IsKeyDown(Keys.Q))
+            {
+                clientBox.IsVisible = !clientBox.IsVisible;
+                serverBox.IsVisible = !serverBox.IsVisible;
+            }
+
             clientState.InjectInput(keyboardState, mouseState);
+            lastState = keyboardState;
         }
 
         public void Draw(GameTime gameTime, GraphicsDevice graphicsDevice)
@@ -53,7 +72,11 @@ namespace SpaceInvaders
             texDraw.Techniques[0].Passes[0].Apply();
             qR.RenderQuad(graphicsDevice, -Vector2.One, Vector2.One, new Vector2(1.0f / Game1.width, 1.0f / Game1.height));
             Game1.SpriteBatch.Begin();
+
             clientState.Draw(gameTime);
+
+            clientBox.Draw();
+            serverBox.Draw();
             Game1.SpriteBatch.End();
         }
 
