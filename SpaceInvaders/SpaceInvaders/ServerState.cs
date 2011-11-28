@@ -134,22 +134,11 @@ namespace SpaceInvaders
         {
             byte[] array;
             int length = 0;
-            int updateCount = 0;
 
             foreach (GameMessage message in messages)
             {
                 length += 6;
                 length += message.MessageSize;
-            }
-            while (length < 400 && updateCount < flatList.Count)
-            {
-                if (currentEntity < 0)
-                    currentEntity = flatList.Count;
-                GameMessage message = flatList[currentEntity].GetStateMessage();
-                length += message.MessageSize + 6;
-                messages.Add(message);
-                ++updateCount;
-                --currentEntity;
             }
             array = new byte[length];
             length = 0;

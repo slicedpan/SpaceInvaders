@@ -76,7 +76,7 @@ namespace SpaceInvaders
                 for (int i = 0; i < message.index; ++i)
                 {
                     GameMessage msg = new GameMessage();
-                    msg.fromBytes(message.Message, 6 + offset);
+                    msg.fromBytes(message.Message, offset);
                     offset += 6;
                     offset += msg.MessageSize;
                     HandleEntityUpdates(msg);
