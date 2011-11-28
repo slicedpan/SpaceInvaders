@@ -84,7 +84,7 @@ namespace SpaceInvaders
             }
             else if (message.DataType == GameState.DataTypeSpawnEntity)
             {
-                Spawn(BitConverter.ToInt32(message.Message, 0), message.index, new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
+                Spawn(message.index, BitConverter.ToInt32(message.Message, 0), new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
             }
             else
             {
