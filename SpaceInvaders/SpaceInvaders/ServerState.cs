@@ -153,7 +153,11 @@ namespace SpaceInvaders
             _infoStack.Push(String.Format("Client {0} connected from address {1}", clientNumber, _server.Connections[clientNumber].Socket.RemoteEndPoint));
             PlayerShip ship = new PlayerShip();
             int clientShipIndex = AddEntity(ship);
-            _server.Send(GameState.SpawnMessage(0, clientShipIndex, ship.Position));
+
+            foreach (IEntity entity in entities.Values)
+            {
+                _server.Send(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+            }
 
             GameMessage initMessage = new GameMessage();
             initMessage.DataType = GameState.DataTypeMetaInfo;

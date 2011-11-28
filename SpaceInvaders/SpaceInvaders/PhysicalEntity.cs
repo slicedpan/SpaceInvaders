@@ -10,7 +10,18 @@ namespace SpaceInvaders
 {
     public class PhysicalEntity : IEntity
     {
-        public Vector2 Position = Vector2.Zero;
+        protected Vector2 _position = Vector2.Zero;
+        public Vector2 Position
+        {
+            get
+            {
+                return _position;
+            }
+            set
+            {
+                _position = value;
+            }
+        }
         public float Angle = 0.0f;
         public Vector2 Velocity = Vector2.Zero;
         public float mass = 1.0f;
