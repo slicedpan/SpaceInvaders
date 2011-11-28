@@ -11,10 +11,11 @@ namespace SpaceInvaders
     {
 
         public const ushort ScoreUpdate = 2;
-        public const ushort HealthUpdate = 3;
-        public const ushort SpawnShip = 4;
-        public const ushort SpawnEntity = 5;
-        public const ushort EntityUpdate = 6;
+        public const ushort HealthUpdate = 3;        
+        public const ushort SpawnEntity = 4;
+       
+        public const ushort DataTypeMetaInfo = 2;
+        public const ushort DataTypeEntityUpdate = 1;
 
         protected Dictionary<int, IEntity> entities;
         protected List<PhysicalEntity> physicalEntities;

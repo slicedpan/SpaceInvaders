@@ -62,12 +62,7 @@ namespace SpaceInvaders
                     serverBox.AddMessage("Started Server");
                     ServerState serverState = new ServerState();
                     serverState.msgBox = serverBox;
-                    Game1.Server = new ONet.GameServer();
-                    Game1.Server.OnClientConnect = new GameServer.Callback(serverState.ClientConnect);
-                    Game1.Server.OnClientMessage = new GameServer.Callback(serverState.Message);
-                    Game1.Server.OnClientDisconnect = new GameServer.Callback(serverState.ClientDisconnect);
-                    Game1.Server.OnError = new GameServer.ErrorCallback(ServerError);
-                    Game1.Server.Listen();                    
+                    //Game1.Server = new ONet.GameServer();                  
                 }
                 else if (Utils.Intersects(mouseX, mouseY, connectRect))
                 {
@@ -87,7 +82,7 @@ namespace SpaceInvaders
                         }
                         else  
                         {
-                            Game1.Client = new ONet.Client(new IPEndPoint(addr, 8024));
+                            //Game1.Client = new ONet.Client(new IPEndPoint(addr, 8024));
                             Game1.Client.OnConnect = new Client.Callback(ClientConnect);
                             Game1.Client.OnError = new Client.ErrorCallback(ClientError);
                             Game1.Client.TryConnect();

@@ -19,9 +19,8 @@ namespace SpaceInvaders
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
-        public static SpriteBatch SpriteBatch;
-        public static GameServer Server;
-        public static Client Client;
+        public static SpriteBatch SpriteBatch;        
+        
         Dictionary<int, ClientInfo> clients;
         public static KeyboardBuffer KeyboardBuffer;
         public static int width = 1024;
@@ -52,7 +51,8 @@ namespace SpaceInvaders
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            var c = new ClientState();
+            var s = new ServerState();
             base.Initialize();
         }
 

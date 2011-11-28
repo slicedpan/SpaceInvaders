@@ -119,6 +119,7 @@
     <Compile Include="MenuScreen.cs" />
     <Compile Include="MessageBox.cs" />
     <Compile Include="MessageHook.cs" />
+    <Compile Include="MessageStack.cs" />
     <Compile Include="MessageType.cs" />
     <Compile Include="PhysicalEntity.cs" />
     <Compile Include="PlayerInfo.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="ServerState.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="TestScreen.cs" />
+    <Compile Include="TextStack.cs" />
     <Compile Include="UITex.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Window.cs" />

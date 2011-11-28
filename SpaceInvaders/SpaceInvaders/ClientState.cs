@@ -15,16 +15,66 @@ namespace SpaceInvaders
         PlayerShip ship;
         int playerIndex = -1;
         public MessageBox errorBox;
+        public static ClientState currentInstance;
+        Client _client;
+        MessageStack<GameMessage> _messageStack;
+        MessageStack<String> _errorStack;
+        MessageStack<String> _infoStack;
 
-        public void ServerError(GameMessage message)
+        #region accessors
+
+        MessageStack<String> InfoStack
         {
-            if (errorBox != null)
-                errorBox.AddMessage(message.messageAsString());
+            get
+            {
+                return _infoStack;
+            }
+        }
+
+        MessageStack<String> ErrorStack
+        {
+            get
+            {
+                return _errorStack;
+            }
+        }
+        MessageStack<GameMessage> GameMessageStack
+        {
+            get
+            {
+                return _messageStack;
+            }
+        }
+
+        #endregion
+
+        void ErrorCallback(String error)
+        {
+            _errorStack.Push(error);
+        }
+
+        void ConnectCallback(GameMessage message)
+        {
+            _infoStack.Push(String.Format("Connected to: {0}", _client.EndPoint));
+        }
+
+        void DisconnectCallback(GameMessage message)
+        {
+            _infoStack.Push(String.Format("Disconnected from server: {0}", message.messageAsString()));
         }
 
         public ClientState()
         {
-            Game1.Client.OnMessage = new Client.Callback(ServerMessage);
+            _client = new Client();
+            _client.OnMessage = new Client.Callback(MessageCallback);
+            _client.OnError = new Client.ErrorCallback(ErrorCallback);
+            _client.OnConnect = new Client.Callback(ConnectCallback);
+            _client.OnDisconnect = new Client.Callback(DisconnectCallback);
+            _messageStack = new MessageStack<GameMessage>();
+            if (currentInstance == null)
+                currentInstance = this;
+            else
+                throw new Exception("only one instance of client state allowed");
         }
         public void Draw(GameTime gameTime)
         {
@@ -42,6 +92,11 @@ namespace SpaceInvaders
                     ship = entities[playerIndex] as PlayerShip;
                 }
             }
+            GameMessage msg;
+            while (_messageStack.Pop(out msg))
+            {
+                HandleMessage(msg);
+            }
             base.Update(gameTime);
         }
         public void InjectInput(KeyboardState keyboardState, MouseState mouseState)
@@ -51,10 +106,14 @@ namespace SpaceInvaders
                 ship.InjectInput(keyboardState, mouseState);
             }
         }
-        public void ServerMessage(GameMessage message)
+        public void MessageCallback(GameMessage message)
+        {
+            _messageStack.Push(message);            
+        }
+        void HandleMessage(GameMessage message)
         {
             if (message.DataType == GameMessage.Bundle || message.DataType == 1)
-                HandleEntityUpdates(message);            
+                HandleEntityUpdates(message);
             else if (message.DataType == 2)
             {
                 switch (message.index)
