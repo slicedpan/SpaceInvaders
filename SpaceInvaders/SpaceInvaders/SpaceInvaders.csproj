@@ -134,7 +134,6 @@
     <Compile Include="ServerState.cs" />
     <Compile Include="Stack.cs" />
     <Compile Include="TestScreen.cs" />
-    <Compile Include="TextStack.cs" />
     <Compile Include="UITex.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Window.cs" />
