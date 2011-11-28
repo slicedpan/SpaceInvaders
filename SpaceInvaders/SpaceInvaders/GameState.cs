@@ -70,19 +70,7 @@ namespace SpaceInvaders
 
         public void HandleEntityUpdates(GameMessage message)
         {
-            if (message.DataType == GameMessage.Bundle)
-            {
-                int offset = 0;
-                for (int i = 0; i < message.index; ++i)
-                {
-                    GameMessage msg = new GameMessage();
-                    msg.fromBytes(message.Message, offset);
-                    offset += 6;
-                    offset += msg.MessageSize;
-                    HandleEntityUpdates(msg);
-                }
-            }
-            else if (message.DataType == GameState.DataTypeSpawnEntity)
+            if (message.DataType == GameState.DataTypeSpawnEntity)
             {
                 Spawn(message.index, BitConverter.ToInt32(message.Message, 0), new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
             }

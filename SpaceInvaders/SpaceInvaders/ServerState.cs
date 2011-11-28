@@ -125,34 +125,21 @@ namespace SpaceInvaders
                 }
                 else
                 {
-                    HandleEntityUpdates(message);
+                    if (message.DataType == GameMessage.Bundle)
+                    {
+                        List<GameMessage> bundleMessages = GameMessage.SplitBundle(message);
+                        foreach (GameMessage msg in bundleMessages)
+                        {
+                            HandleEntityUpdates(msg);
+                        }
+                    }
                 }
             }
             base.Update(gameTime);
         }
         public void PopulateMessageBundle()
         {
-            byte[] array;
-            int length = 0;
-
-            foreach (GameMessage message in messages)
-            {
-                length += 6;
-                length += message.MessageSize;
-            }
-            array = new byte[length];
-            length = 0;
-            foreach (GameMessage message in messages)
-            {
-                message.toBytes().CopyTo(array, length);
-                length += 6;
-                length += message.MessageSize;
-            }
-            GameMessage bundle = new GameMessage();
-            bundle.index = (ushort)messages.Count;
-            bundle.DataType = GameMessage.Bundle;
-            bundle.SetMessage(array);
-            CurrentBundle = bundle;
+            CurrentBundle = GameMessage.MessageBundle(messages);
         }
         public void Reset()
         {
@@ -177,9 +164,11 @@ namespace SpaceInvaders
             PlayerShip ship = new PlayerShip();
             int clientShipIndex = AddEntity(ship);
 
+            List<GameMessage> initMessages = new List<GameMessage>();
+
             foreach (IEntity entity in entities.Values)
             {
-                _server.Connections[clientNumber].Send(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                initMessages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));                
             }
 
             foreach (KeyValuePair<int, Connection> kvp in _server.Connections)
@@ -194,7 +183,8 @@ namespace SpaceInvaders
             byte[] arr = new byte[4];
             BitConverter.GetBytes(clientShipIndex).CopyTo(arr, 0);
             initMessage.SetMessage(arr);
-            _server.Connections[clientNumber].Send(initMessage);
+            initMessages.Add(initMessage);
+            _server.Connections[clientNumber].Send(GameMessage.MessageBundle(initMessages));
         }        
     }
 }

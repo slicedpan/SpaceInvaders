@@ -133,7 +133,18 @@ namespace SpaceInvaders
         }
         public void MessageCallback(GameMessage message)
         {
-            _messageStack.Push(message);            
+            if (message.DataType == GameMessage.Bundle)
+            {
+                List<GameMessage> messages = GameMessage.SplitBundle(message);
+                for (int i = 0; i < messages.Count; ++i)
+                {
+                    _messageStack.Push(messages[i]);
+                }
+            }
+            else
+            {
+                _messageStack.Push(message);
+            }
         }
         void HandleMessage(GameMessage message)
         {
