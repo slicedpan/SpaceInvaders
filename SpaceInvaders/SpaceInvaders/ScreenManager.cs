@@ -20,6 +20,8 @@ namespace SpaceInvaders
         ContentManager ContentManager;
         RenderTarget2D oldRenderTarget;
         RenderTarget2D newRenderTarget;
+        Effect transitionEffect;
+        QuadRenderer qr;
 
         float lastAlpha = 0.0f;
         float currentAlpha = 0.0f;
@@ -32,6 +34,8 @@ namespace SpaceInvaders
             if (currentInstance == null)
             {
                 ContentManager = cm;
+                qr = new QuadRenderer();
+                transitionEffect = cm.Load<Effect>("shaders/transition");
                 GraphicsDevice = graphicsDevice;
                 SpriteBatch = new SpriteBatch(graphicsDevice);
                 newRenderTarget = new RenderTarget2D(GraphicsDevice, Game1.width, Game1.height, false, SurfaceFormat.Color, DepthFormat.Depth24);
@@ -57,10 +61,11 @@ namespace SpaceInvaders
                 GraphicsDevice.SetRenderTarget(oldRenderTarget);
                 lastScreen.Draw(gameTime, GraphicsDevice);
                 GraphicsDevice.SetRenderTarget(null);
-                SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied);
-                SpriteBatch.Draw(newRenderTarget, new Vector2(0.0f, 0.0f), new Color(1.0f, 1.0f, 1.0f, currentAlpha));
-                SpriteBatch.Draw(oldRenderTarget, new Vector2(0.0f, 0.0f), new Color(1.0f, 1.0f, 1.0f, lastAlpha));
-                SpriteBatch.End();
+                transitionEffect.Parameters["initialTexture"].SetValue(oldRenderTarget);
+                transitionEffect.Parameters["finalTexture"].SetValue(newRenderTarget);
+                transitionEffect.Parameters["t"].SetValue(currentAlpha);
+                transitionEffect.Techniques[0].Passes[0].Apply();
+                qr.RenderQuad(GraphicsDevice, -Vector2.One, Vector2.One, new Vector2(1.0f / Game1.width, 1.0f / Game1.height));
             }
             else
             {

@@ -10,12 +10,14 @@ namespace SpaceInvaders
     public class GameState
     {
 
-        public const ushort ScoreUpdate = 2;
-        public const ushort HealthUpdate = 3;        
-        public const ushort SpawnEntity = 4;
-       
+        public const ushort IndexScoreUpdate = 2;
+        public const ushort IndexHealthUpdate = 3;        
+        public const ushort IndexSpawnEntity = 4;
+        public const ushort IndexInitialisePlayerShip = 5;
+        
         public const ushort DataTypeMetaInfo = 2;
         public const ushort DataTypeEntityUpdate = 1;
+        public const ushort DataTypeSpawnEntity = 3;
 
         protected Dictionary<int, IEntity> entities;
         protected List<PhysicalEntity> physicalEntities;
@@ -28,17 +30,15 @@ namespace SpaceInvaders
         }
 
         public virtual void AddEntity(int ID, IEntity entityToAdd)
-        {
+        {            
             entities.Add(ID, entityToAdd);
             if (entityToAdd is PhysicalEntity)
                 physicalEntities.Add(entityToAdd as PhysicalEntity);
         }
         public virtual int AddEntity(IEntity entityToAdd)
         {
-            entities.Add(counter, entityToAdd);
+            AddEntity(counter, entityToAdd);
             ++counter;
-            if (entityToAdd is PhysicalEntity)
-                physicalEntities.Add(entityToAdd as PhysicalEntity);
             return counter - 1;   
         }
         public virtual void Update(GameTime gameTime)
@@ -67,6 +67,10 @@ namespace SpaceInvaders
                     HandleEntityUpdates(msg);
                 }
             }
+            else if (message.DataType == GameState.DataTypeSpawnEntity)
+            {
+                Spawn(BitConverter.ToInt32(message.Message, 0), message.index, new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
+            }
             else
             {
                 entities[message.index].HandleMessage(message);
@@ -75,14 +79,28 @@ namespace SpaceInvaders
         public static GameMessage SpawnMessage(int entityType, int entityID, Vector2 position)
         {
             GameMessage msg = new GameMessage();
-            msg.DataType = 2;
-            msg.index = GameState.SpawnEntity;
+            msg.DataType = DataTypeSpawnEntity;
+            msg.index = (ushort)entityID;
             byte[] array = new byte[12];
-            BitConverter.GetBytes(entityID).CopyTo(array, 0);
+            BitConverter.GetBytes(entityType).CopyTo(array, 0);
             BitConverter.GetBytes(position.X).CopyTo(array, 4);
             BitConverter.GetBytes(position.Y).CopyTo(array, 8);
             msg.SetMessage(array);
             return msg;
         }
+        private void Spawn(int index, int p, Vector2 position)
+        {
+            switch (p)
+            {
+                case 0:
+                    var ship = new PlayerShip();
+                    ship.Position = position;
+                    AddEntity(index, ship);
+                    break;
+                case 1:
+                    break;
+            }
+        }
+
     }
 }

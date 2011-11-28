@@ -17,7 +17,47 @@ namespace SpaceInvaders
         const double updatesPerSec = 20.0d;
         Dictionary<int, PlayerInfo> playerInfo;
         public static ServerState currentInstance;
-        public MessageBox msgBox;
+
+        GameServer _server;
+        MessageStack<GameMessage> _messageStack;
+        MessageStack<String> _errorStack;
+        MessageStack<String> _infoStack;
+
+        #region accessors
+
+        public MessageStack<String> InfoStack
+        {
+            get
+            {
+                return _infoStack;
+            }
+        }
+
+        public MessageStack<String> ErrorStack
+        {
+            get
+            {
+                return _errorStack;
+            }
+        }
+
+        public MessageStack<GameMessage> GameMessageStack
+        {
+            get
+            {
+                return _messageStack;
+            }
+        } 
+
+        public GameServer GameServer
+        {
+            get
+            {
+                return _server;
+            }
+        }
+
+        #endregion
 
         public ServerState()
         {
@@ -33,6 +73,13 @@ namespace SpaceInvaders
             flatList = new List<IEntity>();
             playerInfo= new Dictionary<int, PlayerInfo>();
             currentEntity = 0;
+            _server = new GameServer();
+            _server.OnClientConnect = new ONet.GameServer.Callback(ClientConnect);
+            _server.OnClientDisconnect = new ONet.GameServer.Callback(ClientDisconnect);
+            _server.OnClientMessage = new ONet.GameServer.Callback(Message);
+            _messageStack = new MessageStack<GameMessage>();
+            _infoStack = new MessageStack<string>();
+            _errorStack = new MessageStack<string>();
         }
         public override int AddEntity(IEntity entityToAdd)
         {
@@ -45,6 +92,7 @@ namespace SpaceInvaders
             if (counter > (1.0d / updatesPerSec))
             {
                 PopulateMessageBundle();
+                _server.Send(CurrentBundle);
                 counter = 0.0d;
             }
             base.Update(gameTime);
@@ -94,19 +142,26 @@ namespace SpaceInvaders
         }
         public void Message(int clientNumber, GameMessage message)
         {
-
-        }
-        public void ClientConnect(int clientNumber, GameMessage message)
-        {
-            if (msgBox != null)
-                msgBox.AddMessage("Client connected, client number: " + clientNumber);
-            int id = AddEntity(new PlayerShip());
-            Game1.Server.Connections[clientNumber].Send(GameState.SpawnMessage(1, id, new Vector2(512, 700)));
+            _messageStack.Push(message);
         }
         public void ClientDisconnect(int clientNumber, GameMessage message)
         {
-            if (msgBox != null)
-                msgBox.AddMessage(String.Format("Client {0} disconnected: {1}", clientNumber, message.messageAsString()));
+            _infoStack.Push(String.Format("Client {0} disconnected: {1}", clientNumber, message.messageAsString()));
         }
+        public void ClientConnect(int clientNumber, GameMessage message)
+        {
+            _infoStack.Push(String.Format("Client {0} connected from address {1}", clientNumber, _server.Connections[clientNumber].Socket.RemoteEndPoint));
+            PlayerShip ship = new PlayerShip();
+            int clientShipIndex = AddEntity(ship);
+            _server.Send(GameState.SpawnMessage(0, clientShipIndex, ship.Position));
+
+            GameMessage initMessage = new GameMessage();
+            initMessage.DataType = GameState.DataTypeMetaInfo;
+            initMessage.index = GameState.IndexInitialisePlayerShip;
+            byte[] arr = new byte[4];
+            BitConverter.GetBytes(clientShipIndex).CopyTo(arr, 0);
+            initMessage.SetMessage(arr);
+            _server.Connections[clientNumber].Send(initMessage);
+        }        
     }
 }

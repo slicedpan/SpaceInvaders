@@ -30,7 +30,14 @@ namespace SpaceInvaders
         }
         public void InjectInput(KeyboardState ks, MouseState ms)
         {
-
+            if (ks.IsKeyDown(Keys.D))
+                Position.X += 2.0f;
+            else if (ks.IsKeyDown(Keys.A))
+                Position.X -= 2.0f;
+            if (ks.IsKeyDown(Keys.W))
+                Position.Y -= 2.0f;
+            else if (ks.IsKeyDown(Keys.S))
+                Position.Y += 2.0f;
         }
         public override void HandleMessage(GameMessage message)
         {
@@ -39,10 +46,10 @@ namespace SpaceInvaders
         public override GameMessage GetStateMessage()
         {
             GameMessage msg = new GameMessage();
-            msg.DataType = GameState.EntityUpdate;
+            msg.DataType = GameState.DataTypeEntityUpdate;
             msg.index = 0;
             byte[] array = new byte[26];
-            BitConverter.GetBytes(GameState.EntityUpdate);            
+            BitConverter.GetBytes(GameState.DataTypeEntityUpdate);            
             BitConverter.GetBytes(Position.X).CopyTo(array, 0);
             BitConverter.GetBytes(Position.Y).CopyTo(array, 4);
             BitConverter.GetBytes(Velocity.X).CopyTo(array, 8);

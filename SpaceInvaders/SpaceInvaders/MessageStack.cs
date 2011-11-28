@@ -8,7 +8,7 @@ namespace SpaceInvaders
 {
     public class MessageStack<T>
     {
-        List<T> messages;
+        List<T> messages = new List<T>();
         public bool Pop(out T message)
         {
             if (messages.Count == 0)

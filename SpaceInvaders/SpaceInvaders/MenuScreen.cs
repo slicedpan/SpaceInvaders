@@ -19,6 +19,7 @@ namespace SpaceInvaders
         Texture2D serverButton;
         Texture2D connectButton;
         Texture2D cursorImg;
+        Texture2D bgImg;
         Rectangle serverRect;
         Rectangle connectRect;
         MessageBox serverBox;
@@ -48,6 +49,25 @@ namespace SpaceInvaders
                 ip += newText;
             }
             ticks += gameTime.ElapsedGameTime.Milliseconds;
+            String errorMsg;
+            while (ClientState.currentInstance.ErrorStack.Pop(out errorMsg))
+            {
+                clientBox.AddMessage(errorMsg);
+            }
+            while (ServerState.currentInstance.ErrorStack.Pop(out errorMsg))
+            {
+                serverBox.AddMessage(errorMsg);
+            }
+            while (ClientState.currentInstance.InfoStack.Pop(out errorMsg))
+            {
+                clientBox.AddMessage(errorMsg);
+            }
+            while (ServerState.currentInstance.InfoStack.Pop(out errorMsg))
+            {
+                serverBox.AddMessage(errorMsg);
+            }
+            if (ClientState.currentInstance.Client.Connected)
+                ScreenManager.currentInstance.Switch(new ClientScreen());
         }        
 
         public void InjectInput(KeyboardState keyboardState, MouseState mouseState)
@@ -60,17 +80,15 @@ namespace SpaceInvaders
                 {
                     serverBox = new MessageBox(8, 0, 0);
                     serverBox.AddMessage("Started Server");
-                    ServerState serverState = new ServerState();
-                    serverState.msgBox = serverBox;
-                    //Game1.Server = new ONet.GameServer();                  
+                    ServerState.currentInstance.GameServer.Listen();
                 }
                 else if (Utils.Intersects(mouseX, mouseY, connectRect))
                 {
                     IPAddress addr;
-                    if (Game1.Client != null && Game1.Client.Connected)
+                    if (ClientState.currentInstance.Client.Connected)
                     {
-                        Game1.Client.Disconnect("just wanted to");
-                        Game1.Client.Dispose();
+                        ClientState.currentInstance.Client.Disconnect("just wanted to");
+                        ClientState.currentInstance.Client.Dispose();
                     }
                     else
                     {
@@ -82,10 +100,7 @@ namespace SpaceInvaders
                         }
                         else  
                         {
-                            //Game1.Client = new ONet.Client(new IPEndPoint(addr, 8024));
-                            Game1.Client.OnConnect = new Client.Callback(ClientConnect);
-                            Game1.Client.OnError = new Client.ErrorCallback(ClientError);
-                            Game1.Client.TryConnect();
+                            ClientState.currentInstance.Client.TryConnect(new IPEndPoint(addr, 8024));
                             clientBox = new MessageBox(8, Game1.width - 400, 0);
                             clientBox.AddMessage("Started Client, connecting to : " + ip);
                         }
@@ -102,6 +117,7 @@ namespace SpaceInvaders
         {
             graphicsDevice.Clear(Color.Black);
             Game1.SpriteBatch.Begin();
+            Game1.SpriteBatch.Draw(bgImg, new Rectangle(0, 0, Game1.width, Game1.height), Color.White);
             Game1.SpriteBatch.Draw(serverButton, serverRect, Color.White);
             Game1.SpriteBatch.Draw(connectButton, connectRect, Color.White);
             Game1.SpriteBatch.Draw(cursorImg, new Rectangle(mouseX, mouseY, 18, 16), Color.White);             
@@ -127,6 +143,7 @@ namespace SpaceInvaders
             serverButton = contentManager.Load<Texture2D>("server");
             connectButton = contentManager.Load<Texture2D>("connect");
             cursorImg = contentManager.Load<Texture2D>("cursor");
+            bgImg = contentManager.Load<Texture2D>("galaxy");
         }
 
         

@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using ONet;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace SpaceInvaders
 {
@@ -20,10 +21,11 @@ namespace SpaceInvaders
         MessageStack<GameMessage> _messageStack;
         MessageStack<String> _errorStack;
         MessageStack<String> _infoStack;
+        ContentManager _contentManager;
 
         #region accessors
 
-        MessageStack<String> InfoStack
+        public MessageStack<String> InfoStack
         {
             get
             {
@@ -31,18 +33,27 @@ namespace SpaceInvaders
             }
         }
 
-        MessageStack<String> ErrorStack
+        public MessageStack<String> ErrorStack
         {
             get
             {
                 return _errorStack;
             }
         }
-        MessageStack<GameMessage> GameMessageStack
+
+        public MessageStack<GameMessage> GameMessageStack
         {
             get
             {
                 return _messageStack;
+            }
+        }
+
+        public Client Client
+        {
+            get
+            {
+                return _client;
             }
         }
 
@@ -63,6 +74,11 @@ namespace SpaceInvaders
             _infoStack.Push(String.Format("Disconnected from server: {0}", message.messageAsString()));
         }
 
+        public void LoadContent(ContentManager cm)
+        {
+            _contentManager = cm;
+        }
+
         public ClientState()
         {
             _client = new Client();
@@ -71,6 +87,9 @@ namespace SpaceInvaders
             _client.OnConnect = new Client.Callback(ConnectCallback);
             _client.OnDisconnect = new Client.Callback(DisconnectCallback);
             _messageStack = new MessageStack<GameMessage>();
+            _infoStack = new MessageStack<string>();
+            _errorStack = new MessageStack<string>();
+
             if (currentInstance == null)
                 currentInstance = this;
             else
@@ -99,6 +118,13 @@ namespace SpaceInvaders
             }
             base.Update(gameTime);
         }
+
+        public override void AddEntity(int ID, IEntity entityToAdd)
+        {
+            entityToAdd.LoadContent(_contentManager);
+            base.AddEntity(ID, entityToAdd);
+        }
+
         public void InjectInput(KeyboardState keyboardState, MouseState mouseState)
         {
             if (ship != null)
@@ -112,37 +138,27 @@ namespace SpaceInvaders
         }
         void HandleMessage(GameMessage message)
         {
-            if (message.DataType == GameMessage.Bundle || message.DataType == 1)
-                HandleEntityUpdates(message);
-            else if (message.DataType == 2)
+            if (message.DataType == GameState.DataTypeMetaInfo)
             {
                 switch (message.index)
                 {
-                    case ScoreUpdate:
+                    case IndexScoreUpdate:
                         score = BitConverter.ToInt32(message.Message, 0);
                         break;
-                    case HealthUpdate:
+                    case IndexHealthUpdate:
                         health = BitConverter.ToInt32(message.Message, 0);
                         break;
-                    case SpawnEntity:
-                        Spawn(BitConverter.ToInt32(message.Message, 0), new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
+                    case IndexInitialisePlayerShip:
+                        playerIndex = BitConverter.ToInt32(message.Message, 0);
+                        ship = entities[playerIndex] as PlayerShip;
                         break;
                 }
             }
-        }
-        private void Spawn(int p, Vector2 position)
-        {
-            switch (p)
+            else
             {
-                case 1:
-                    ship = new PlayerShip();
-                    ship.Position = position;
-                    playerIndex = p;
-                    AddEntity(p, ship);                    
-                    break;
-                case 2:
-                    break;
+                HandleEntityUpdates(message);
             }
         }
+        
     }
 }
