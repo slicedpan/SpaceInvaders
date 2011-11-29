@@ -3,20 +3,49 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceInvaders", "SpaceInvaders\SpaceInvaders\SpaceInvaders.csproj", "{33A9AF6A-6230-499A-98F4-FB62758FB3E1}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "SpaceInvadersContent", "SpaceInvaders\SpaceInvadersContent\SpaceInvadersContent.contentproj", "{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceInvadersContent", "SpaceInvaders\SpaceInvadersContent\SpaceInvadersContent.contentproj", "{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "ConsoleApplication1\Tests.csproj", "{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}"
 EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = SpaceInvaders.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Debug|Mixed Platforms.Build.0 = Debug|x86
 		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Debug|x86.ActiveCfg = Debug|x86
 		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Debug|x86.Build.0 = Debug|x86
+		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Release|Any CPU.ActiveCfg = Release|x86
+		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Release|Mixed Platforms.Build.0 = Release|x86
 		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Release|x86.ActiveCfg = Release|x86
 		{33A9AF6A-6230-499A-98F4-FB62758FB3E1}.Release|x86.Build.0 = Release|x86
+		{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}.Debug|x86.ActiveCfg = Debug|x86
+		{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}.Release|Any CPU.ActiveCfg = Release|x86
+		{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}.Release|x86.ActiveCfg = Release|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Debug|x86.ActiveCfg = Debug|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Debug|x86.Build.0 = Debug|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Release|Any CPU.ActiveCfg = Release|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Release|Mixed Platforms.Build.0 = Release|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Release|x86.ActiveCfg = Release|x86
+		{60CE0E0F-B422-4E2D-9374-C83B10FEDB18}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,10 +17,12 @@ namespace SpaceInvaders
         int playerIndex = -1;
         public MessageBox errorBox;
         public static ClientState currentInstance;
+        List<IEntity> clientControlled = new List<IEntity>();
         Client _client;
         MessageStack<GameMessage> _messageStack;
         MessageStack<String> _errorStack;
         MessageStack<String> _infoStack;
+        List<GameMessage> _messages = new List<GameMessage>();
 
         #region accessors
 
@@ -60,17 +62,38 @@ namespace SpaceInvaders
 
         void ErrorCallback(String error)
         {
-            _errorStack.Push(error);
+            try
+            {
+                _errorStack.Push(error);
+            }
+            catch (Exception e)
+            {
+                _errorStack.Push(e.Message);
+            }
         }
 
         void ConnectCallback(GameMessage message)
         {
-            _infoStack.Push(String.Format("Connected to: {0}", _client.EndPoint));
+            try
+            {
+                _infoStack.Push(String.Format("Connected to: {0}", _client.EndPoint));
+            }
+            catch (Exception e)
+            {
+                _errorStack.Push(e.Message);
+            }
         }
 
         void DisconnectCallback(GameMessage message)
         {
-            _infoStack.Push(String.Format("Disconnected from server: {0}", message.messageAsString()));
+            try
+            {
+                _infoStack.Push(String.Format("Disconnected from server: {0}", message.messageAsString()));
+            }
+            catch (Exception e)
+            {
+                _errorStack.Push(e.Message);
+            }
         }
 
         public ClientState()
@@ -80,37 +103,49 @@ namespace SpaceInvaders
             _client.OnError = new Client.ErrorCallback(ErrorCallback);
             _client.OnConnect = new Client.Callback(ConnectCallback);
             _client.OnDisconnect = new Client.Callback(DisconnectCallback);
-            _messageStack = new MessageStack<GameMessage>();
-            _infoStack = new MessageStack<string>();
-            _errorStack = new MessageStack<string>();
+            _messageStack = new MessageStack<GameMessage>(10);
+            _infoStack = new MessageStack<string>(10);
+            _errorStack = new MessageStack<string>(10);
 
             if (currentInstance == null)
                 currentInstance = this;
             else
                 throw new Exception("only one instance of client state allowed");
         }
+
+        double secondCounter = 0.0d;
         
         public override void Update(GameTime gameTime)
         {
-            if (ship == null)
+
+            secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (secondCounter > 1000.0d)
             {
-                if (playerIndex >= 0)
+                if (ship != null)
+                    _infoStack.Push("Ship pos: " + ship.Position.ToString());
+                secondCounter = 0.0d;
+            }
+
+            foreach (IEntity entity in clientControlled)
+            {
+                if (entity.RequiresUpdate)
                 {
-                    ship = entities[playerIndex] as PlayerShip;
+                    _messages.Add(entity.GetStateMessage());
+                    entity.RequiresUpdate = false;
                 }
             }
-            
+
+            _client.Send(GameMessage.MessageBundle(_messages));
+
             GameMessage msg;
             while (_messageStack.Pop(out msg))
             {
-                HandleMessage(msg);
+                if (msg != null && msg.Message != null)
+                    HandleMessage(msg);
             }
             base.Update(gameTime);
 
-            foreach (IEntity entity in entities.Values)
-            {
-                _client.Send(entity.GetStateMessage());
-            }            
+           
         }
 
         public override void AddEntity(int ID, IEntity entityToAdd)
@@ -130,20 +165,32 @@ namespace SpaceInvaders
             {
                 ship.InjectInput(keyboardState, mouseState);
             }
+            else
+            {
+                if (entities.Keys.Contains<int>(playerIndex))
+                    ship = entities[playerIndex] as PlayerShip;
+            }
         }
         public void MessageCallback(GameMessage message)
         {
-            if (message.DataType == GameMessage.Bundle)
+            try
             {
-                List<GameMessage> messages = GameMessage.SplitBundle(message);
-                for (int i = 0; i < messages.Count; ++i)
+                if (message.DataType == GameMessage.Bundle)
                 {
-                    _messageStack.Push(messages[i]);
+                    List<GameMessage> messages = GameMessage.SplitBundle(message);
+                    for (int i = 0; i < messages.Count; ++i)
+                    {
+                        _messageStack.Push(messages[i]);
+                    }
+                }
+                else
+                {
+                    _messageStack.Push(message);
                 }
             }
-            else
+            catch (Exception e)
             {
-                _messageStack.Push(message);
+                _errorStack.Push(e.Message);
             }
         }
         void HandleMessage(GameMessage message)
@@ -160,15 +207,35 @@ namespace SpaceInvaders
                         break;
                     case IndexInitialisePlayerShip:
                         playerIndex = BitConverter.ToInt32(message.Message, 0);
-                        ship = entities[playerIndex] as PlayerShip;
+                        if (entities.Keys.Contains<int>(playerIndex))
+                        {
+                            ship = entities[playerIndex] as PlayerShip;
+                            clientControlled.Add(ship);
+                        }
+                        else
+                            Query((ushort)playerIndex);
                         break;
                 }
             }
             else
             {
-                HandleEntityUpdates(message);
+                if (entities.Keys.Contains<int>(message.index))
+                {
+                    HandleEntityUpdates(message);
+                }
+                else
+                {
+                    Query(message.index);
+                }
             }
         }
-        
+        void Query(ushort index)
+        {
+            GameMessage query = new GameMessage();
+            query.DataType = GameState.DataTypeQuery;
+            query.index = index;
+            query.MessageSize = 0;
+            _messages.Add(query);
+        }
     }
 }

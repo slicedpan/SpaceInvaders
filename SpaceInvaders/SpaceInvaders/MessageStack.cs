@@ -9,6 +9,11 @@ namespace SpaceInvaders
     public class MessageStack<T>
     {
         List<T> messages = new List<T>();
+        int _max;
+        public MessageStack(int max)
+        {
+            _max = max;
+        }
         public bool Pop(out T message)
         {
             if (messages.Count == 0)
@@ -26,6 +31,8 @@ namespace SpaceInvaders
         public void Push(T message)
         {
             messages.Add(message);
+            if (messages.Count > _max)
+                messages.Remove(messages[0]);
         }
     }
 }

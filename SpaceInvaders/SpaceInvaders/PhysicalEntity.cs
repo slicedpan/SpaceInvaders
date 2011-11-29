@@ -11,6 +11,18 @@ namespace SpaceInvaders
     public class PhysicalEntity : IEntity
     {
         protected Vector2 _position = Vector2.Zero;
+        bool requiresUpdate = false;
+        public bool RequiresUpdate
+        {
+            get
+            {
+                return requiresUpdate;
+            }
+            set
+            {
+                requiresUpdate = value;
+            }
+        }
         public Vector2 Position
         {
             get
@@ -35,9 +47,14 @@ namespace SpaceInvaders
             }
         }
 
-        public void Update(GameTime gameTime)
-        {
+        public virtual void Update(GameTime gameTime)
+        { 
             _position += Velocity;
+            Velocity *= 0.7f;
+            if (Velocity.Length() < 0.001f)
+                Velocity = Vector2.Zero;
+            else
+                requiresUpdate = true;
         }
 
         public virtual void LoadContent(ContentManager Content)

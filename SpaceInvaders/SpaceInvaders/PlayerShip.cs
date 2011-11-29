@@ -19,7 +19,7 @@ namespace SpaceInvaders
             {
                 return 0;
             }
-        }
+        }        
         public override void LoadContent(ContentManager Content)
         {
             sprite = Content.Load<Texture2D>("playersprite");
@@ -31,18 +31,31 @@ namespace SpaceInvaders
         public void InjectInput(KeyboardState ks, MouseState ms)
         {
             if (ks.IsKeyDown(Keys.D))
-                _position.X += 2.0f;
+            {
+                Velocity.X += 2.0f;
+                RequiresUpdate = true;
+            }
             else if (ks.IsKeyDown(Keys.A))
-                _position.X -= 2.0f;
+            {
+                Velocity.X -= 2.0f;
+                RequiresUpdate = true;
+            }
             if (ks.IsKeyDown(Keys.W))
-                _position.Y -= 2.0f;
+            {
+                Velocity.Y -= 2.0f;
+                RequiresUpdate = true;
+            }
             else if (ks.IsKeyDown(Keys.S))
-                _position.Y += 2.0f;
+            {
+                Velocity.Y += 2.0f;
+                RequiresUpdate = true;
+            }
         }
         public override void HandleMessage(GameMessage message)
         {
-            Position = new Vector2(BitConverter.ToSingle(message.Message, 0), BitConverter.ToSingle(message.Message, 4));
+            Vector2 newPosition = new Vector2(BitConverter.ToSingle(message.Message, 0), BitConverter.ToSingle(message.Message, 4));
             Velocity = new Vector2(BitConverter.ToSingle(message.Message, 8), BitConverter.ToSingle(message.Message, 12));
+            Velocity += (newPosition - Position) * 0.064f;
             Angle = BitConverter.ToSingle(message.Message, 16);
         }
         public override GameMessage GetStateMessage()
@@ -58,6 +71,10 @@ namespace SpaceInvaders
             BitConverter.GetBytes(Angle).CopyTo(array, 16);
             msg.SetMessage(array);
             return msg;
+        }
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
         }
     }
 }

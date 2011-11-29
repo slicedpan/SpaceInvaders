@@ -19,5 +19,6 @@ namespace SpaceInvaders
         GameMessage GetStateMessage();
         int typeID { get; }
         Vector2 Position { get; }
+        bool RequiresUpdate { get; set; }
     }
 }

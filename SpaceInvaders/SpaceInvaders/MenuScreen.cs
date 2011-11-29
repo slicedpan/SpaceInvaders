@@ -96,7 +96,7 @@ namespace SpaceInvaders
                             ip = "127.0.0.1";
                         if (!IPAddress.TryParse(ip, out addr))
                         {
-                            clientBox.AddMessage("Incorrect IP address");
+                            //clientBox.AddMessage("Incorrect IP address");
                         }
                         else  
                         {

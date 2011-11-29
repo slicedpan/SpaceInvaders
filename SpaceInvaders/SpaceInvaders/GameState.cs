@@ -19,6 +19,7 @@ namespace SpaceInvaders
         public const ushort DataTypeMetaInfo = 2;
         public const ushort DataTypeEntityUpdate = 1;
         public const ushort DataTypeSpawnEntity = 3;
+        public const ushort DataTypeQuery = 4;
 
         protected Dictionary<int, IEntity> entities;
         protected List<PhysicalEntity> physicalEntities;
@@ -76,7 +77,11 @@ namespace SpaceInvaders
             }
             else
             {
+                if (!entities.Keys.Contains<int>(message.index))
+                    AddEntity(message.index, new DummyEntity());
                 entities[message.index].HandleMessage(message);
+                
+                
             }
         }
         public static GameMessage SpawnMessage(int entityType, int entityID, Vector2 position)
@@ -93,6 +98,14 @@ namespace SpaceInvaders
         }
         private void Spawn(int index, int p, Vector2 position)
         {
+            if (entities.Keys.Contains<int>(index))
+            {
+                if (entities[index].typeID == -1)
+                {
+                    entities.Remove(index);
+                }
+            }
+
             switch (p)
             {
                 case 0:
@@ -103,6 +116,7 @@ namespace SpaceInvaders
                 case 1:
                     break;
             }
+            
         }
 
     }

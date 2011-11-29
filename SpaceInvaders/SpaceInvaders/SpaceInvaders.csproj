@@ -113,6 +113,7 @@
     <Compile Include="ClientInfo.cs" />
     <Compile Include="ClientScreen.cs" />
     <Compile Include="ClientState.cs" />
+    <Compile Include="DummyEntity.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="IGameScreen.cs" />
     <Compile Include="KeyboardBuffer.cs" />
@@ -144,8 +145,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SpaceInvadersContent\SpaceInvadersContent.contentproj">
-      <Name>SpaceInvadersContent</Name>
+      <Name>SpaceInvadersContent %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
+      <Project>{D6B19DBF-1B42-46BF-B545-E1A8D3B22551}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
