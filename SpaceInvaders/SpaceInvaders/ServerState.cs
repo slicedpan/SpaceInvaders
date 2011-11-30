@@ -24,6 +24,10 @@ namespace SpaceInvaders
         MessageStack<String> _errorStack;
         MessageStack<String> _infoStack;
 
+        List<IEntity> createdEntities = new List<IEntity>();
+        List<IAIControlled> AIControlledEntities = new List<IAIControlled>();
+        List<IRemovable> removableEntities = new List<IRemovable>();
+
         #region accessors
 
         public MessageStack<String> InfoStack
@@ -81,18 +85,48 @@ namespace SpaceInvaders
             _messageStack = new MessageStack<GameMessage>(10);
             _infoStack = new MessageStack<string>(10);
             _errorStack = new MessageStack<string>(10);
+            createdEntities.Add(new EnemyShip());
         }
         public override int AddEntity(IEntity entityToAdd)
         {
             flatList.Add(entityToAdd);
+            if (entityToAdd is IAIControlled)
+            {
+                var AI = entityToAdd as IAIControlled;
+                AI.creationList = createdEntities;
+                AIControlledEntities.Add(AI);
+                
+            }
+            if (entityToAdd is IRemovable)
+            {
+                removableEntities.Add(entityToAdd as IRemovable);
+            }
             return base.AddEntity(entityToAdd);
         }
+
         public override void Update(GameTime gameTime)
         {
             updateCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
             secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
 
             GameMessage message;
+
+            foreach (IAIControlled AI in AIControlledEntities)
+            {
+                AI.Think(gameTime);                
+            }
+
+            if (createdEntities.Count > 0)
+            {
+                foreach (IEntity entity in createdEntities)
+                {
+                    int newIndex = AddEntity(entity);
+                    messages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                }
+                createdEntities.Clear();
+            }
+
+            CullEntities();
 
             while (_messageStack.Pop(out message))
             {
@@ -104,20 +138,27 @@ namespace SpaceInvaders
                 {                    
                     if (message.DataType == GameState.DataTypeQuery)
                     {
-                        messages.Add(GameState.SpawnMessage(entities[message.index].typeID, message.index, entities[message.index].Position));
+                        //_infoStack.Push(String.Format("Entity {0} queried, sending info", message.index));
+                        if (entities.Keys.Contains<int>(message.index))
+                            messages.Add(GameState.SpawnMessage(entities[message.index].typeID, message.index, entities[message.index].Position));
                     }
                     else 
                     {
-                        HandleEntityUpdates(message);
+                        //_infoStack.Push(String.Format("Entity {0} Update Received, DataType {1}", message.index, message.DataType));
+                        if (message.Message != null)
+                            HandleEntityUpdates(message, true); 
                     }
                 }
             }
 
-            if (updateCounter > (1.0d / updatesPerSec))
+            if (updateCounter > (1000.0d / Game1.updatesPerSecond))
             {
                 foreach (IEntity entity in entities.Values)
                 {
-                    messages.Add(entity.GetStateMessage());
+                    if (entity.RequiresUpdate)
+                    {
+                        messages.Add(entity.GetStateMessage());
+                    }
                 }
                 if (messages.Count > 0)
                 {
@@ -127,8 +168,7 @@ namespace SpaceInvaders
                     }
                     else
                     {
-                        PopulateMessageBundle();
-                        _server.Send(CurrentBundle);
+                        _server.Send(PopulateMessageBundle());
                         messages.Clear();
                     }
                 }
@@ -143,12 +183,32 @@ namespace SpaceInvaders
                 secondCounter = 0.0d;
             }
             
-            
             base.Update(gameTime);
         }
-        public void PopulateMessageBundle()
+
+        private void CullEntities()
         {
-            CurrentBundle = GameMessage.MessageBundle(messages);
+            List<IRemovable> toBeRemoved = new List<IRemovable>();
+            for (int i = removableEntities.Count - 1; i >= 0; --i)
+            {
+                if (removableEntities[i].isReadyToRemove)
+                {
+                    toBeRemoved.Add(removableEntities[i]);
+                    RemoveEntity(removableEntities[i] as IEntity);
+                }
+            }
+            foreach (IRemovable removable in toBeRemoved)
+            {
+                removableEntities.Remove(removable);
+            }
+        }
+        public GameMessage PopulateMessageBundle()
+        {
+            while (messages.Count > 50)
+            {
+                messages.Remove(messages[0]);
+            }
+            return GameMessage.MessageBundle(messages);
         }
         public void Reset()
         {
@@ -198,6 +258,7 @@ namespace SpaceInvaders
                 _infoStack.Push(String.Format("Client {0} connected from address {1}", clientNumber, _server.Connections[clientNumber].Socket.RemoteEndPoint));
                 PlayerShip ship = new PlayerShip();
                 int clientShipIndex = AddEntity(ship);
+                ship.Place(new Vector2(Game1.width / 2.0f, Game1.height - 20.0f));
 
                 List<GameMessage> initMessages = new List<GameMessage>();
 

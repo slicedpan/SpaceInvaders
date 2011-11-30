@@ -13,20 +13,32 @@ namespace SpaceInvaders
     public class PlayerShip : PhysicalEntity
     {
         Texture2D sprite;
+        public PlayerShip()
+        {
+            mass = 10.0f;
+        }
         public override int typeID
         {
             get
             {
                 return 0;
             }
-        }        
+        }
+        public override float MaxSpeed
+        {
+            get
+            {
+                return 10.0f;
+            }
+        }
         public override void LoadContent(ContentManager Content)
         {
             sprite = Content.Load<Texture2D>("playersprite");
         }
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            Game1.SpriteBatch.Draw(sprite, Position, Color.White);
+            Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + sprite.Height / 2, sprite.Width, sprite.Height);
+            Game1.SpriteBatch.Draw(sprite, rect, Color.White);            
         }
         public void InjectInput(KeyboardState ks, MouseState ms)
         {
@@ -51,11 +63,14 @@ namespace SpaceInvaders
                 RequiresUpdate = true;
             }
         }
-        public override void HandleMessage(GameMessage message)
+        public override void HandleMessage(GameMessage message, bool strict)
         {
             Vector2 newPosition = new Vector2(BitConverter.ToSingle(message.Message, 0), BitConverter.ToSingle(message.Message, 4));
             Velocity = new Vector2(BitConverter.ToSingle(message.Message, 8), BitConverter.ToSingle(message.Message, 12));
-            Velocity += (newPosition - Position) * 0.064f;
+            if (strict)
+                Position = newPosition;
+            else
+                Velocity += (newPosition - Position) * 0.064f;
             Angle = BitConverter.ToSingle(message.Message, 16);
         }
         public override GameMessage GetStateMessage()

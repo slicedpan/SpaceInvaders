@@ -15,7 +15,7 @@ namespace SpaceInvaders
         void Draw(GameTime gameTime);
         BoundingSphere BoundingSphere { get; }
         int ID { get; set; }
-        void HandleMessage(GameMessage message);
+        void HandleMessage(GameMessage message, bool strict);
         GameMessage GetStateMessage();
         int typeID { get; }
         Vector2 Position { get; }

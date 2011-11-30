@@ -15,6 +15,7 @@ namespace SpaceInvaders
         int _width, _height;
         Rectangle _rect;
         Window bgWindow;
+        int messageCounter = 10;
         public MessageBox(int lines, int X, int Y)
         {
             messages = new List<string>();
@@ -54,13 +55,14 @@ namespace SpaceInvaders
                 bgWindow.Draw(Game1.SpriteBatch);
                 for (int i = 0; i < messages.Count; ++i)
                 {
-                    Game1.SpriteBatch.DrawString(Game1.mbFont, messages[i], new Vector2(_X + 8, _Y + (i * 11) + 3), Color.White);
+                    Game1.SpriteBatch.DrawString(Game1.mbFont, String.Format("{0} - {1}", messageCounter - 10 + i, messages[i]), new Vector2(_X + 8, _Y + (i * 11) + 3), Color.White);
                 }
             }
         }
         public void AddMessage(string message)
         {            
             messages.Add(message);
+            ++messageCounter;
             if (messages.Count > _maxLines)
             {
                 messages.Remove(messages[0]);

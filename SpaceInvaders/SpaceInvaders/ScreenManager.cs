@@ -71,6 +71,7 @@ namespace SpaceInvaders
             {
                 GraphicsDevice.SetRenderTarget(null);
                 currentScreen.Draw(gameTime, GraphicsDevice);
+                
             }            
         }
         public void Update(GameTime gameTime)

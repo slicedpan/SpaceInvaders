@@ -110,12 +110,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bullet.cs" />
     <Compile Include="ClientInfo.cs" />
     <Compile Include="ClientScreen.cs" />
     <Compile Include="ClientState.cs" />
     <Compile Include="DummyEntity.cs" />
+    <Compile Include="EnemyShip.cs" />
     <Compile Include="Entity.cs" />
+    <Compile Include="IAIControlled.cs" />
     <Compile Include="IGameScreen.cs" />
+    <Compile Include="IRemovable.cs" />
     <Compile Include="KeyboardBuffer.cs" />
     <Compile Include="MenuScreen.cs" />
     <Compile Include="MessageBox.cs" />

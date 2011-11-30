@@ -33,7 +33,9 @@ namespace SpaceInvaders
             lastMouseState = new MouseState();
             Game1.KeyboardBuffer.Enabled = true;
             serverRect = new Rectangle(50, 668, 120, 50);
-            connectRect = new Rectangle(Game1.width - 170, 668, 120, 50);            
+            connectRect = new Rectangle(Game1.width - 170, 668, 120, 50);
+            serverBox = new MessageBox(8, 0, 0);
+            clientBox = new MessageBox(8, Game1.width - 400, 0);
         }
         public void Update(GameTime gameTime)
         {
@@ -78,7 +80,7 @@ namespace SpaceInvaders
             {
                 if (Utils.Intersects(mouseX, mouseY, serverRect))
                 {
-                    serverBox = new MessageBox(8, 0, 0);
+
                     serverBox.AddMessage("Started Server");
                     ServerState.currentInstance.GameServer.Listen();
                 }
@@ -101,7 +103,7 @@ namespace SpaceInvaders
                         else  
                         {
                             ClientState.currentInstance.Client.TryConnect(new IPEndPoint(addr, 8024));
-                            clientBox = new MessageBox(8, Game1.width - 400, 0);
+                            
                             clientBox.AddMessage("Started Client, connecting to : " + ip);
                         }
                         ip = "";

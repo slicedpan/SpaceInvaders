@@ -33,7 +33,9 @@ namespace SpaceInvaders
 
         public void Update(GameTime gameTime)
         {
-            clientState.Update(gameTime);            
+            clientState.Update(gameTime);
+            if (ServerState.currentInstance.GameServer.isActive)
+                ServerState.currentInstance.Update(gameTime);
             String clientTextMessage;
             while (clientState.InfoStack.Pop(out clientTextMessage))
             {

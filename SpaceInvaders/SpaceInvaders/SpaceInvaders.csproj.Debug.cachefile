@@ -13,3 +13,6 @@ Content\shaders\texdraw.xnb
 Content\playersprite.xnb
 Content\galaxy.xnb
 Content\shaders\transition.xnb
+Content\enemyship.xnb
+Content\bullet.xnb
+Content\circle.xnb

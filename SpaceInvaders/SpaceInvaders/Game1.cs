@@ -29,6 +29,9 @@ namespace SpaceInvaders
         public static SpriteFont Font;
         public static SpriteFont mbFont;
         public static UI UITex;
+        public static double updatesPerSecond = 15.0d;
+        public static Texture2D circleTex;
+        public static BoundingSphere screenExtent;
 
         public Game1()
         {
@@ -39,7 +42,9 @@ namespace SpaceInvaders
             Content.RootDirectory = "Content";
             clients = new Dictionary<int, ClientInfo>();
             KeyboardBuffer = new KeyboardBuffer(this.Window.Handle);
-            KeyboardBuffer.TranslateMessage = true;            
+            KeyboardBuffer.TranslateMessage = true;
+            float screenRadius = (float)Math.Sqrt(Math.Pow(width / 2.0d, 2.0d) + Math.Pow(height / 2.0d, 2.0d));
+            screenExtent = new BoundingSphere(new Vector3((float)width / 2.0f, (float)height / 2.0f, 0.0f), screenRadius);
         }  
 
         /// <summary>
@@ -70,6 +75,7 @@ namespace SpaceInvaders
             screenManager.SetScreen(new MenuScreen());
             Font = Content.Load<SpriteFont>("Segoe");
             mbFont = Content.Load<SpriteFont>("text");
+            circleTex = Content.Load<Texture2D>("circle");
 
             // TODO: use this.Content to load your game content here
         }
@@ -103,7 +109,7 @@ namespace SpaceInvaders
 
             // TODO: Add your update logic here
             screenManager.Update(gameTime);
-            ServerState.currentInstance.Update(gameTime);
+
             base.Update(gameTime);
         }
 

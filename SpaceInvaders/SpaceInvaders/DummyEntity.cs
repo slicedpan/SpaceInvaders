@@ -50,7 +50,7 @@ namespace SpaceInvaders
             }
         }
 
-        public void HandleMessage(GameMessage message)
+        public void HandleMessage(GameMessage message, bool strict)
         {
             _position = new Vector2(BitConverter.ToSingle(message.Message, 0), BitConverter.ToSingle(message.Message, 4));
         }
