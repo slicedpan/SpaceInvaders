@@ -11,16 +11,17 @@ namespace SpaceInvaders
     public class GameState
     {
 
-        public const ushort IndexScoreUpdate = 2;
-        public const ushort IndexHealthUpdate = 3;        
-        public const ushort IndexSpawnEntity = 4;
-        public const ushort IndexInitialisePlayerShip = 5;
+        public const int IndexScoreUpdate = 2;
+        public const int IndexHealthUpdate = 3;        
+        public const int IndexSpawnEntity = 4;
+        public const int IndexInitialisePlayerShip = 5;
         
         public const ushort DataTypeMetaInfo = 2;
         public const ushort DataTypeEntityUpdate = 1;
         public const ushort DataTypeSpawnEntity = 3;
         public const ushort DataTypeDespawnEntity = 5;
-        public const ushort DataTypeQuery = 4;
+        public const ushort DataTypeEntityQuery = 4;
+        public const ushort DataTypeRequest = 6;
 
         protected Dictionary<int, IEntity> entities;
         protected List<PhysicalEntity> physicalEntities;
@@ -107,7 +108,7 @@ namespace SpaceInvaders
                 Spawn(message.index, BitConverter.ToInt32(message.Message, 0), new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
             }
             else if (message.DataType == GameState.DataTypeDespawnEntity)
-            {
+            {                
                 Despawn(message.index);
             }
             else
@@ -121,7 +122,7 @@ namespace SpaceInvaders
         {
             GameMessage msg = new GameMessage();
             msg.DataType = DataTypeSpawnEntity;
-            msg.index = (ushort)entityID;
+            msg.index = entityID;
             byte[] array = new byte[12];
             BitConverter.GetBytes(entityType).CopyTo(array, 0);
             BitConverter.GetBytes(position.X).CopyTo(array, 4);
@@ -133,7 +134,7 @@ namespace SpaceInvaders
         {
             GameMessage msg = new GameMessage();
             msg.DataType = DataTypeDespawnEntity;
-            msg.index = (ushort)index;
+            msg.index = index;
             msg.MessageSize = 0;
             return msg;
         }

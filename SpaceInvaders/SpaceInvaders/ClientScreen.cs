@@ -62,6 +62,10 @@ namespace SpaceInvaders
                 clientBox.IsVisible = !clientBox.IsVisible;
                 serverBox.IsVisible = !serverBox.IsVisible;
             }
+            if (keyboardState.IsKeyDown(Keys.P) && !lastState.IsKeyDown(Keys.P))
+            {
+                clientState.RequestInitialisation();
+            }
 
             clientState.InjectInput(keyboardState, mouseState);
             lastState = keyboardState;
