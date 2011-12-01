@@ -104,6 +104,12 @@ namespace SpaceInvaders
             return base.AddEntity(entityToAdd);
         }
 
+        public override void RemoveEntity(IEntity entityToRemove)
+        {
+            broadcastMessages.Add(GameState.DespawnMessage(entityToRemove.ID));
+            base.RemoveEntity(entityToRemove);
+        }
+
         public override void Update(GameTime gameTime)
         {
             updateCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
