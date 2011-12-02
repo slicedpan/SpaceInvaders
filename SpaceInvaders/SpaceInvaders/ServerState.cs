@@ -9,18 +9,19 @@ namespace SpaceInvaders
 {
     public class ServerState : GameState
     {
-        int currentEntity;
+
         List<IEntity> flatList;
-        List<GameMessage> messages;
+        Dictionary<int, List<GameMessage>> messages = new Dictionary<int,List<GameMessage>>();
+        List<GameMessage> broadcastMessages = new List<GameMessage>();
         public GameMessage CurrentBundle;
         double updateCounter = 0.0d;
         double secondCounter = 0.0d;
         const double updatesPerSec = 20.0d;
         Dictionary<int, PlayerInfo> playerInfo;
+        Dictionary<int, MessageStack<GameMessage>> _messageStacks = new Dictionary<int, MessageStack<GameMessage>>();
         public static ServerState currentInstance;
 
         GameServer _server;
-        MessageStack<GameMessage> _messageStack;
         MessageStack<String> _errorStack;
         MessageStack<String> _infoStack;
 
@@ -46,11 +47,11 @@ namespace SpaceInvaders
             }
         }
 
-        public MessageStack<GameMessage> GameMessageStack
+        public Dictionary<int, MessageStack<GameMessage>> GameMessageStack
         {
             get
             {
-                return _messageStack;
+                return _messageStacks;
             }
         } 
 
@@ -74,19 +75,18 @@ namespace SpaceInvaders
             {
                 throw new Exception("only one instance of ServerState is allowed");
             }
-            messages = new List<GameMessage>();
             flatList = new List<IEntity>();
             playerInfo= new Dictionary<int, PlayerInfo>();
-            currentEntity = 0;
             _server = new GameServer();
             _server.OnClientConnect = new ONet.GameServer.Callback(ClientConnect);
             _server.OnClientDisconnect = new ONet.GameServer.Callback(ClientDisconnect);
             _server.OnClientMessage = new ONet.GameServer.Callback(Message);
-            _messageStack = new MessageStack<GameMessage>(10);
+            _server.OnError = new ONet.GameServer.ErrorCallback(ErrorMessage);
             _infoStack = new MessageStack<string>(10);
             _errorStack = new MessageStack<string>(10);
             createdEntities.Add(new EnemyShip());
         }
+
         public override int AddEntity(IEntity entityToAdd)
         {
             flatList.Add(entityToAdd);
@@ -104,12 +104,16 @@ namespace SpaceInvaders
             return base.AddEntity(entityToAdd);
         }
 
+        public override void RemoveEntity(IEntity entityToRemove)
+        {
+            broadcastMessages.Add(GameState.DespawnMessage(entityToRemove.ID));
+            base.RemoveEntity(entityToRemove);
+        }
+
         public override void Update(GameTime gameTime)
         {
             updateCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
             secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
-
-            GameMessage message;
 
             foreach (IAIControlled AI in AIControlledEntities)
             {
@@ -121,35 +125,14 @@ namespace SpaceInvaders
                 foreach (IEntity entity in createdEntities)
                 {
                     int newIndex = AddEntity(entity);
-                    messages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                    broadcastMessages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
                 }
                 createdEntities.Clear();
             }
 
             CullEntities();
 
-            while (_messageStack.Pop(out message))
-            {
-                if (message == null)
-                {
-
-                }
-                else
-                {                    
-                    if (message.DataType == GameState.DataTypeQuery)
-                    {
-                        //_infoStack.Push(String.Format("Entity {0} queried, sending info", message.index));
-                        if (entities.Keys.Contains<int>(message.index))
-                            messages.Add(GameState.SpawnMessage(entities[message.index].typeID, message.index, entities[message.index].Position));
-                    }
-                    else 
-                    {
-                        //_infoStack.Push(String.Format("Entity {0} Update Received, DataType {1}", message.index, message.DataType));
-                        if (message.Message != null)
-                            HandleEntityUpdates(message, true); 
-                    }
-                }
-            }
+            HandleMessages();
 
             if (updateCounter > (1000.0d / Game1.updatesPerSecond))
             {
@@ -157,21 +140,44 @@ namespace SpaceInvaders
                 {
                     if (entity.RequiresUpdate)
                     {
-                        messages.Add(entity.GetStateMessage());
+                        broadcastMessages.Add(entity.GetStateMessage());
                     }
                 }
-                if (messages.Count > 0)
+                foreach (KeyValuePair<int, List<GameMessage>> messageList in messages)
                 {
-                    if (messages.Count == 1)
+                    messageList.Value.AddRange(broadcastMessages);
+                    if (messageList.Value.Count > 0)
                     {
-                        _server.Send(messages[0]);
-                    }
-                    else
-                    {
-                        _server.Send(PopulateMessageBundle());
-                        messages.Clear();
+                        if (messageList.Value.Count == 1)
+                        {
+                            _server.Connections[messageList.Key].Send(messageList.Value[0]);
+                        }
+                        else
+                        {
+                            while (messageList.Value.Count > 50)
+                            {
+                                messageList.Value.Remove(messageList.Value[0]);
+                            }
+                            GameMessage initMessage = new GameMessage();
+                            initMessage.DataType = GameState.DataTypeMetaInfo;
+                            initMessage.index = GameState.IndexInitialisePlayerShip;
+                            byte[] arr = new byte[4];
+                            BitConverter.GetBytes(playerInfo[messageList.Key].EntityID).CopyTo(arr, 0);
+                            initMessage.SetMessage(arr);
+
+
+                            if (messageList.Value.Contains<GameMessage>(initMessage, new GameMessageComparer()))
+                            {
+
+                            }
+                            Connection conn;
+                            if(_server.Connections.TryGetValue(messageList.Key, out conn))
+                                conn.Send(GameMessage.MessageBundle(messageList.Value));
+                        }
+                        messageList.Value.Clear();
                     }
                 }
+                broadcastMessages.Clear();
                 updateCounter = 0.0d;
             }
             if (secondCounter > 1000.0d)
@@ -184,6 +190,54 @@ namespace SpaceInvaders
             }
             
             base.Update(gameTime);
+        }
+
+        private void HandleMessages()
+        {
+            GameMessage message;
+            foreach (KeyValuePair<int, MessageStack<GameMessage>> kvp in _messageStacks)
+            {
+                while (kvp.Value.Pop(out message))
+                {
+                    if (message == null)
+                    {
+
+                    }
+                    else
+                    {
+                        if (message.DataType == GameState.DataTypeEntityQuery)
+                        {
+                            //_infoStack.Push(String.Format("Entity {0} queried, sending info", message.index));
+                            if (entities.Keys.Contains<int>(message.index))
+                                messages[kvp.Key].Add(GameState.SpawnMessage(entities[message.index].typeID, message.index, entities[message.index].Position));
+                        }
+                        else if (message.DataType == GameState.DataTypeRequest)
+                        {
+                            switch (message.index)
+                            {
+                                case GameState.IndexInitialisePlayerShip:
+                                    GameMessage initMessage = new GameMessage();
+                                    initMessage.DataType = GameState.DataTypeMetaInfo;
+                                    initMessage.index = GameState.IndexInitialisePlayerShip;
+                                    byte[] arr = new byte[4];
+                                    int clientID = kvp.Key;
+                                    BitConverter.GetBytes(playerInfo[clientID].EntityID).CopyTo(arr, 0);
+                                    initMessage.SetMessage(arr);
+                                    messages[kvp.Key].Add(initMessage);
+
+                                    _infoStack.Push(String.Format("Initialisation request from client {0}, ship index {1}", clientID, playerInfo[clientID].EntityID));
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            //_infoStack.Push(String.Format("Entity {0} Update Received, DataType {1}", message.index, message.DataType));
+                            if (message.Message != null)
+                                HandleEntityUpdates(message, true);
+                        }
+                    }
+                }
+            }
         }
 
         private void CullEntities()
@@ -202,14 +256,7 @@ namespace SpaceInvaders
                 removableEntities.Remove(removable);
             }
         }
-        public GameMessage PopulateMessageBundle()
-        {
-            while (messages.Count > 50)
-            {
-                messages.Remove(messages[0]);
-            }
-            return GameMessage.MessageBundle(messages);
-        }
+
         public void Reset()
         {
             foreach (IEntity entity in entities.Values)
@@ -219,6 +266,14 @@ namespace SpaceInvaders
             entities.Clear();
             flatList.Clear();
         }
+
+        #region callbacks
+
+        public void ErrorMessage(string errorMessage)
+        {
+            _errorStack.Push(errorMessage);
+        }
+
         public void Message(int clientNumber, GameMessage message)
         {
             try
@@ -227,12 +282,12 @@ namespace SpaceInvaders
                 {
                     foreach (GameMessage msg in GameMessage.SplitBundle(message))
                     {
-                        _messageStack.Push(msg);
+                        _messageStacks[clientNumber].Push(msg);
                     }
                 }
                 else
                 {
-                    _messageStack.Push(message);
+                    _messageStacks[clientNumber].Push(message);
                 }
             }
             catch (Exception e)
@@ -240,37 +295,47 @@ namespace SpaceInvaders
                 _errorStack.Push(e.Message);
             }
         }
+
         public void ClientDisconnect(int clientNumber, GameMessage message)
         {
             try
             {
-                _infoStack.Push(String.Format("Client {0} disconnected: {1}", clientNumber, message.messageAsString()));                
+                _infoStack.Push(String.Format("Client {0} disconnected: {1}", clientNumber, message.messageAsString()));
+                messages.Remove(clientNumber);
+                _messageStacks.Remove(clientNumber);
+                broadcastMessages.Add(DespawnMessage(playerInfo[clientNumber].EntityID));
+                RemoveEntity(entities[playerInfo[clientNumber].EntityID]);
+                playerInfo.Remove(clientNumber);
             }
             catch (Exception e)
             {
                 _errorStack.Push(e.Message);
             }
         }
+
         public void ClientConnect(int clientNumber, GameMessage message)
         {
             try
             {
+
+                playerInfo.Add(clientNumber, new PlayerInfo(clientNumber));
+                _messageStacks.Add(clientNumber, new MessageStack<GameMessage>(50));
+                messages.Add(clientNumber, new List<GameMessage>());
+
                 _infoStack.Push(String.Format("Client {0} connected from address {1}", clientNumber, _server.Connections[clientNumber].Socket.RemoteEndPoint));
                 PlayerShip ship = new PlayerShip();
                 int clientShipIndex = AddEntity(ship);
                 ship.Place(new Vector2(Game1.width / 2.0f, Game1.height - 20.0f));
 
-                List<GameMessage> initMessages = new List<GameMessage>();
-
                 foreach (IEntity entity in entities.Values)
                 {
-                    initMessages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                    messages[clientNumber].Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
                 }
 
-                foreach (KeyValuePair<int, Connection> kvp in _server.Connections)
+                foreach (KeyValuePair<int, List<GameMessage>> kvp in messages)
                 {
                     if (kvp.Key != clientNumber)
-                        kvp.Value.Send(GameState.SpawnMessage(0, clientShipIndex, ship.Position));
+                        kvp.Value.Add(GameState.SpawnMessage(0, clientShipIndex, ship.Position));
                 }
 
                 GameMessage initMessage = new GameMessage();
@@ -279,13 +344,19 @@ namespace SpaceInvaders
                 byte[] arr = new byte[4];
                 BitConverter.GetBytes(clientShipIndex).CopyTo(arr, 0);
                 initMessage.SetMessage(arr);
-                initMessages.Add(initMessage);
-                _server.Connections[clientNumber].Send(GameMessage.MessageBundle(initMessages));
+                messages[clientNumber].Add(initMessage);
+
+                playerInfo[clientNumber].EntityID = clientShipIndex;
+
+
             }
             catch (Exception e)
             {
                 _errorStack.Push(e.Message);
             }
-        }        
+        }
+
+        #endregion
+
     }
 }

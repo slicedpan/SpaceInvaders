@@ -8,9 +8,15 @@ Content\sideborder.xnb
 Content\tlcorner.xnb
 Content\topbotborder.xnb
 Content\blcorner.xnb
+Content\playersprite.xnb
 Content\background.xnb
+<<<<<<< HEAD
+Content\shaders\texdraw.xnb
+Content\galaxy.xnb
+=======
 Content\playersprite.xnb
 Content\shaders\texdraw.xnb
+>>>>>>> origin/master
 Content\shaders\transition.xnb
 Content\galaxy.xnb
 Content\enemyship.xnb

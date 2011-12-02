@@ -24,7 +24,7 @@ namespace SpaceInvaders
         MessageStack<String> _infoStack;
         List<GameMessage> _messages = new List<GameMessage>();
         List<int> queries = new List<int>();
-        List<IEntity> createdEntities = new List<IEntity>();
+        List<IEntity> createdEntities = new List<IEntity>();        
 
         #region accessors
 
@@ -60,45 +60,7 @@ namespace SpaceInvaders
             }
         }
 
-        #endregion
-
-        void ErrorCallback(String error)
-        {
-            try
-            {
-                _errorStack.Push(error);
-            }
-            catch (Exception e)
-            {
-                _errorStack.Push(e.Message);
-            }
-        }
-
-        void ConnectCallback(GameMessage message)
-        {
-            try
-            {
-                _infoStack.Push(String.Format("Connected to: {0}", _client.EndPoint));
-            }
-            catch (Exception e)
-            {
-                _errorStack.Push(e.Message);
-            }
-        }
-
-        void DisconnectCallback(GameMessage message)
-        {
-            try
-            {
-                _infoStack.Push(String.Format("Disconnected from server: {0}", message.messageAsString()));
-            }
-            catch (Exception e)
-            {
-                _errorStack.Push(e.Message);
-            }
-            _client.Dispose();
-            _client = null;
-        }
+        #endregion        
 
         public ClientState()
         {
@@ -107,7 +69,7 @@ namespace SpaceInvaders
             _client.OnError = new Client.ErrorCallback(ErrorCallback);
             _client.OnConnect = new Client.Callback(ConnectCallback);
             _client.OnDisconnect = new Client.Callback(DisconnectCallback);
-            _messageStack = new MessageStack<GameMessage>(10);
+            _messageStack = new MessageStack<GameMessage>(50);
             _infoStack = new MessageStack<string>(10);
             _errorStack = new MessageStack<string>(10);
 
@@ -169,7 +131,7 @@ namespace SpaceInvaders
             queries.Clear();
             while (_messageStack.Pop(out msg))
             {
-                if (msg != null && msg.Message != null)
+                if (msg != null)
                     HandleMessage(msg);
             }
             base.Update(gameTime);
@@ -203,6 +165,9 @@ namespace SpaceInvaders
                 }
             }
         }
+
+        #region callbacks
+
         public void MessageCallback(GameMessage message)
         {
             try
@@ -225,6 +190,47 @@ namespace SpaceInvaders
                 _errorStack.Push(e.Message);
             }
         }
+
+        void ErrorCallback(String error)
+        {
+            try
+            {
+                _errorStack.Push(error);
+            }
+            catch (Exception e)
+            {
+                _errorStack.Push(e.Message);
+            }
+        }
+
+        void ConnectCallback(GameMessage message)
+        {
+            try
+            {
+                _infoStack.Push(String.Format("Connected to: {0}", _client.EndPoint));
+            }
+            catch (Exception e)
+            {
+                _errorStack.Push(e.Message);
+            }
+        }
+
+        void DisconnectCallback(GameMessage message)
+        {
+            try
+            {
+                _infoStack.Push(String.Format("Disconnected from server: {0}", message.messageAsString()));
+            }
+            catch (Exception e)
+            {
+                _errorStack.Push(e.Message);
+            }
+            _client.Dispose();
+            _client = null;
+        }
+
+        #endregion
+
         void HandleMessage(GameMessage message)
         {
             if (message.DataType == GameState.DataTypeMetaInfo)
@@ -247,12 +253,14 @@ namespace SpaceInvaders
                             _infoStack.Push("Ship attached");
                         }
                         else
-                            Query((ushort)playerIndex);
+                            Query(playerIndex);
                         break;
                 }
             }
             else
             {
+                if (message.DataType == DataTypeDespawnEntity)
+                    _infoStack.Push("Despawn called for entity: " + message.index.ToString());
                 if (message.DataType == DataTypeSpawnEntity)
                 {
                     HandleEntityUpdates(message, true);
@@ -273,16 +281,36 @@ namespace SpaceInvaders
                 }
             }
         }
-        void Query(ushort index)
-        {
-            if (queries.Contains(index))            
-                return;            
+        void Query(int index)
+        {          
             GameMessage query = new GameMessage();
-            query.DataType = GameState.DataTypeQuery;
+            _infoStack.Push("Querying entity: " + index.ToString());
+            query.DataType = GameState.DataTypeEntityQuery;
             query.index = index;
             query.MessageSize = 0;
             queries.Add(index);
-            _messages.Add(query);
+            if (!_messages.Contains<GameMessage>(query, new GameMessageComparer()))
+                _messages.Add(query);
+        }
+        void MakeRequest(int index)
+        {
+            GameMessage request = new GameMessage();
+            _infoStack.Push("Making request type: " + index.ToString());
+            request.DataType = GameState.DataTypeRequest;
+            request.index = index;
+            request.MessageSize = 0;
+
+            if (!_messages.Contains<GameMessage>(request, new GameMessageComparer()))
+                _messages.Add(request);
+        }
+        public void QueryPlayerShip()
+        {
+            if (playerIndex >= 0)
+                Query(playerIndex);
+        }
+        public void RequestInitialisation()
+        {
+            MakeRequest(GameState.IndexInitialisePlayerShip);
         }
     }
 }

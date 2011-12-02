@@ -7,8 +7,8 @@ namespace SpaceInvaders
 {
     public class PlayerInfo
     {
-        public int Score;
-        public int Health;
+        public int Score = 0;
+        public int Health = 100;
         public int EntityID;
 
         public PlayerInfo(int entityID)
