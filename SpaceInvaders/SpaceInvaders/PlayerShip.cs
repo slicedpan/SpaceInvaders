@@ -13,6 +13,7 @@ namespace SpaceInvaders
     public class PlayerShip : PhysicalEntity
     {
         Texture2D sprite;
+        public Color color;
         public PlayerShip()
         {
             mass = 10.0f;
@@ -38,7 +39,7 @@ namespace SpaceInvaders
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
             Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + sprite.Height / 2, sprite.Width, sprite.Height);
-            Game1.SpriteBatch.Draw(sprite, rect, Color.White);            
+            Game1.SpriteBatch.Draw(sprite, rect, color);            
         }
         public void InjectInput(KeyboardState ks, MouseState ms)
         {
@@ -71,7 +72,7 @@ namespace SpaceInvaders
                 Position = newPosition;
             else
                 Velocity += (newPosition - Position) * 0.064f;
-            Angle = BitConverter.ToSingle(message.Message, 16);
+            Angle = BitConverter.ToSingle(message.Message, 16);             
         }
         public override GameMessage GetStateMessage()
         {

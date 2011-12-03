@@ -53,7 +53,8 @@ namespace SpaceInvaders
         }
         public override void Draw(GameTime gameTime)
         {
-            Game1.SpriteBatch.Draw(sprite, _position, Color.White);
+            Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + sprite.Height / 2, sprite.Width, sprite.Height);
+            Game1.SpriteBatch.Draw(sprite, rect, Color.White);
         }   
 
         public void Think(GameTime gameTime)

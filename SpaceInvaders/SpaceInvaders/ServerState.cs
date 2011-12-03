@@ -11,7 +11,9 @@ namespace SpaceInvaders
     {
 
         List<IEntity> flatList;
+        double lastTime;
         Dictionary<int, List<GameMessage>> messages = new Dictionary<int,List<GameMessage>>();
+        Dictionary<int, double> lastMessage = new Dictionary<int,double>();
         List<GameMessage> broadcastMessages = new List<GameMessage>();
         public GameMessage CurrentBundle;
         double updateCounter = 0.0d;
@@ -20,6 +22,25 @@ namespace SpaceInvaders
         Dictionary<int, PlayerInfo> playerInfo;
         Dictionary<int, MessageStack<GameMessage>> _messageStacks = new Dictionary<int, MessageStack<GameMessage>>();
         public static ServerState currentInstance;
+        Color[] shipColors = new Color[16]
+        {
+            Color.Green,
+            Color.Blue,
+            Color.Brown,
+            Color.Cyan,
+            Color.DarkGray,
+            Color.DarkOliveGreen,
+            Color.DarkSlateBlue,
+            Color.DarkViolet,
+            Color.ForestGreen,
+            Color.Goldenrod,
+            Color.Khaki,
+            Color.LemonChiffon,
+            Color.LightPink,
+            Color.Linen,
+            Color.LightSlateGray,
+            Color.MediumBlue
+        };
 
         GameServer _server;
         MessageStack<String> _errorStack;
@@ -114,6 +135,8 @@ namespace SpaceInvaders
         {
             updateCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
             secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
+
+            lastTime = gameTime.TotalGameTime.TotalSeconds;
 
             foreach (IAIControlled AI in AIControlledEntities)
             {
@@ -276,6 +299,7 @@ namespace SpaceInvaders
 
         public void Message(int clientNumber, GameMessage message)
         {
+            lastMessage[clientNumber] = lastTime;
             try
             {
                 if (message.DataType == GameMessage.Bundle)
@@ -341,13 +365,18 @@ namespace SpaceInvaders
                 GameMessage initMessage = new GameMessage();
                 initMessage.DataType = GameState.DataTypeMetaInfo;
                 initMessage.index = GameState.IndexInitialisePlayerShip;
-                byte[] arr = new byte[4];
+                byte[] arr = new byte[7];
                 BitConverter.GetBytes(clientShipIndex).CopyTo(arr, 0);
+
+                arr[4] = shipColors[clientShipIndex % 16].R;
+                arr[5] = shipColors[clientShipIndex % 16].G;
+                arr[6] = shipColors[clientShipIndex % 16].B;
+
                 initMessage.SetMessage(arr);
                 messages[clientNumber].Add(initMessage);
 
                 playerInfo[clientNumber].EntityID = clientShipIndex;
-
+                lastMessage.Add(clientNumber, lastTime);
 
             }
             catch (Exception e)

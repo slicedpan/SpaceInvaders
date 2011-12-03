@@ -24,7 +24,8 @@ namespace SpaceInvaders
         MessageStack<String> _infoStack;
         List<GameMessage> _messages = new List<GameMessage>();
         List<int> queries = new List<int>();
-        List<IEntity> createdEntities = new List<IEntity>();        
+        List<IEntity> createdEntities = new List<IEntity>();
+        Color shipColor = Color.White;
 
         #region accessors
 
@@ -244,13 +245,14 @@ namespace SpaceInvaders
                         health = BitConverter.ToInt32(message.Message, 0);
                         break;
                     case IndexInitialisePlayerShip:
-                        playerIndex = BitConverter.ToInt32(message.Message, 0);
+                        playerIndex = BitConverter.ToInt32(message.Message, 0);                        
                         _infoStack.Push(String.Format("Player Initialised, ship index: {0}", playerIndex));
                         if (entities.Keys.Contains<int>(playerIndex))
                         {
                             ship = entities[playerIndex] as PlayerShip;
                             clientControlled.Add(ship);
                             _infoStack.Push("Ship attached");
+                            ship.color = new Color((int)message.Message[4], (int)message.Message[5], (int)message.Message[6]);
                         }
                         else
                             Query(playerIndex);
@@ -298,7 +300,7 @@ namespace SpaceInvaders
             _infoStack.Push("Making request type: " + index.ToString());
             request.DataType = GameState.DataTypeRequest;
             request.index = index;
-            request.MessageSize = 0;
+            request.MessageSize = 0;            
 
             if (!_messages.Contains<GameMessage>(request, new GameMessageComparer()))
                 _messages.Add(request);

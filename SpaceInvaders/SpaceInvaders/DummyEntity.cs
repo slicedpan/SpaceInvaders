@@ -19,8 +19,9 @@ namespace SpaceInvaders
 
         public void Update(GameTime gameTime)
         {
-            if (_lastPosition == _position)
+            if (_lastPosition != _position)
                 _requiresUpdate = true;
+            _lastPosition = _position;
         }
 
         public void LoadContent(ContentManager Content)
