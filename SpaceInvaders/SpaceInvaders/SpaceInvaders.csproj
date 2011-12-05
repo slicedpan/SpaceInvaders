@@ -118,6 +118,7 @@
     <Compile Include="EnemyShip.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="IAIControlled.cs" />
+    <Compile Include="IDamageable.cs" />
     <Compile Include="IGameScreen.cs" />
     <Compile Include="IRemovable.cs" />
     <Compile Include="KeyboardBuffer.cs" />

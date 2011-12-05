@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 
 namespace SpaceInvaders
 {
-    class EnemyShip : PhysicalEntity, IAIControlled
+    class EnemyShip : PhysicalEntity, IAIControlled, IDamageable
     {
         Texture2D sprite;
         Vector2 AITarget;
@@ -100,12 +100,14 @@ namespace SpaceInvaders
             get { return AITarget; }
         }
 
-
         public List<IEntity> creationList
         {
             set { _createList = value; }
         }
 
-
+        public void TakeDamage(int amount)
+        {
+            
+        }
     }
 }

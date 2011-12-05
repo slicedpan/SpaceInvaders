@@ -10,10 +10,11 @@ using ONet;
 
 namespace SpaceInvaders
 {
-    public class PlayerShip : PhysicalEntity
+    public class PlayerShip : PhysicalEntity, IDamageable
     {
         Texture2D sprite;
         public Color color;
+        int health = 100;
         public PlayerShip()
         {
             mass = 10.0f;
@@ -91,6 +92,17 @@ namespace SpaceInvaders
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+        }
+
+        public void TakeDamage(int amount)
+        {
+            health -= amount;
+            if (health < 0)
+                Die();
+        }
+        void Die()
+        {
+
         }
     }
 }
