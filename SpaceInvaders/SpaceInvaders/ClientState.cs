@@ -99,7 +99,7 @@ namespace SpaceInvaders
             if (secondCounter > 1000.0d)
             {
                 if (ship != null)
-                    _infoStack.Push("Ship pos: " + ship.Position.ToString());
+                    //_infoStack.Push("Ship pos: " + ship.Position.ToString());
                 secondCounter = 0.0d;
             }
 
@@ -108,8 +108,17 @@ namespace SpaceInvaders
                 foreach (IEntity entity in createdEntities)
                 {
                     int newIndex = AddEntity(entity);
-                    //clientControlled.Add(entity);
-                    _messages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                    if (entity is Bullet)
+                    {
+                        Bullet bullet = entity as Bullet;
+                        int ownerIndex = GetIndex(bullet.Owner);
+                        _messages.Add(bullet.GetSpawnMessage(ownerIndex));
+                    }
+                    else
+                    {
+                        clientControlled.Add(entity);                    
+                        _messages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                    }
                 }
                 createdEntities.Clear();
             }
@@ -250,23 +259,37 @@ namespace SpaceInvaders
             else
             {
                 if (message.DataType == DataTypeDespawnEntity)
+                {
                     _infoStack.Push("Despawn called for entity: " + message.index.ToString());
-                if (message.DataType == DataTypeSpawnEntity)
+                    if (entities.Keys.Contains<int>(message.index))
+                        RemoveEntity(entities[message.index]);
+                }
+                else if (message.DataType == DataTypeSpawnEntity)
                 {
                     HandleEntityUpdates(message, true);
                 }
                 else if (message.DataType == DataTypeReassignID)
                 {
+                    if (!entities.Keys.Contains<int>(message.index))
+                        return;
                     int newIndex = BitConverter.ToInt32(message.Message, 0);
                     _infoStack.Push(String.Format("Reassigning object {0}:{1} to ID {2}", entities[message.index].GetType().ToString(), message.index, newIndex));
-                    ReassignID(message.index, newIndex);
+                    if (!ReassignID(message.index, newIndex))
+                    {
+                        int nextIndex = GetNextID();
+                        _messages.Add(ReassignIndexMessage(newIndex, nextIndex));
+                        ReassignID(newIndex, nextIndex);
+                    }
                 }
                 else
                 {
                     if (entities.Keys.Contains<int>(message.index))
                     {
                         //_infoStack.Push(String.Format("Entity {0} Update Received, DataType {1}", message.index, message.DataType));
-                        HandleEntityUpdates(message, false);
+                        if (clientControlled.Contains(entities[message.index]))
+                            HandleEntityUpdates(message, false);
+                        else
+                            HandleEntityUpdates(message, true);
                     }
                     else
                     {

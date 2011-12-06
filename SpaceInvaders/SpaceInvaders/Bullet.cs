@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework;
+using ONet;
 
 namespace SpaceInvaders
 {
@@ -13,6 +14,13 @@ namespace SpaceInvaders
         Texture2D sprite;
         bool active = true;
         IEntity owner;
+        public IEntity Owner
+        {
+            get
+            {
+                return owner;
+            }
+        }
         public override float MaxSpeed
         {
             get
@@ -56,6 +64,22 @@ namespace SpaceInvaders
             active = false;
         }
         #region IRemovable Members
+
+        public GameMessage GetSpawnMessage(int ownerID)
+        {
+            GameMessage msg = new GameMessage();
+            msg.DataType = GameState.DataTypeSpawnEntity;
+            msg.index = ID;
+            byte[] array = new byte[24];
+            BitConverter.GetBytes(typeID).CopyTo(array, 0);
+            BitConverter.GetBytes(_position.X).CopyTo(array, 4);
+            BitConverter.GetBytes(_position.Y).CopyTo(array, 8);
+            BitConverter.GetBytes(ownerID).CopyTo(array, 12);
+            BitConverter.GetBytes(Velocity.X).CopyTo(array, 16);
+            BitConverter.GetBytes(Velocity.Y).CopyTo(array, 20);               
+            msg.SetMessage(array);
+            return msg;
+        }
 
         public bool isReadyToRemove
         {

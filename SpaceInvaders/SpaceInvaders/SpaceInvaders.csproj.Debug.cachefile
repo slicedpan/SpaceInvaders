@@ -9,10 +9,10 @@ Content\tlcorner.xnb
 Content\topbotborder.xnb
 Content\blcorner.xnb
 Content\background.xnb
-Content\playersprite.xnb
 Content\shaders\texdraw.xnb
-Content\shaders\transition.xnb
+Content\playersprite.xnb
 Content\galaxy.xnb
+Content\shaders\transition.xnb
 Content\enemyship.xnb
 Content\bullet.xnb
 Content\circle.xnb

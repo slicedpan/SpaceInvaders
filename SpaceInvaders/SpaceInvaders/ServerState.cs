@@ -148,7 +148,16 @@ namespace SpaceInvaders
                 foreach (IEntity entity in createdEntities)
                 {
                     int newIndex = AddEntity(entity);
-                    broadcastMessages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                    if (entity is Bullet)
+                    {
+                        Bullet bullet = entity as Bullet;
+                        int ownerIndex = GetIndex(bullet.Owner);
+                        broadcastMessages.Add(bullet.GetSpawnMessage(ownerIndex));
+                    }
+                    else
+                    {
+                        broadcastMessages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                    }
                 }
                 createdEntities.Clear();
             }
@@ -207,7 +216,7 @@ namespace SpaceInvaders
             {
                 foreach (IEntity entity in entities.Values)
                 {
-                    _infoStack.Push(String.Format("Entity {0}, position {1}", entity.ID, entity.Position));
+                    //_infoStack.Push(String.Format("Entity {0}, position {1}", entity.ID, entity.Position));
                 }
                 secondCounter = 0.0d;
             }
@@ -234,7 +243,7 @@ namespace SpaceInvaders
                             if (entities.Keys.Contains<int>(message.index))
                             {
                                 _infoStack.Push(String.Format("Received query for entity {0}:{1}", message.index, entities[message.index].GetType().ToString()));
-                                messages[kvp.Key].Add(GameState.SpawnMessage(entities[message.index].typeID, message.index, entities[message.index].Position));
+                                 messages[kvp.Key].Add(GameState.SpawnMessage(entities[message.index].typeID, message.index, entities[message.index].Position));
                             }
                             else
                             {
@@ -260,6 +269,19 @@ namespace SpaceInvaders
                                     break;
                             }
                         }
+                        else if (message.DataType == GameState.DataTypeReassignID)
+                        {
+                            if (!entities.Keys.Contains<int>(message.index))
+                                return;
+                            int newIndex = BitConverter.ToInt32(message.Message, 0);
+                            _infoStack.Push(String.Format("Reassigning object {0}:{1} to ID {2}", entities[message.index].GetType().ToString(), message.index, newIndex));
+                            if (!ReassignID(message.index, newIndex))
+                            {
+                                int nextIndex = GetNextID();
+                                messages[kvp.Key].Add(ReassignIndexMessage(newIndex, nextIndex));
+                                ReassignID(newIndex, nextIndex);
+                            }
+                        }
                         else
                         {
                             //_infoStack.Push(String.Format("Entity {0} Update Received, DataType {1}", message.index, message.DataType));
@@ -270,7 +292,8 @@ namespace SpaceInvaders
                                 {
                                     int nextID = GetNextID();
                                     messages[kvp.Key].Add(ReassignIndexMessage(message.index, nextID));
-                                    Spawn(nextID, BitConverter.ToInt32(message.Message, 0), new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
+                                    message.index = nextID;
+                                    Spawn(message);
                                 }
                                 else
                                 {
@@ -286,18 +309,7 @@ namespace SpaceInvaders
                     }
                 }
             }
-        }
-
-        GameMessage ReassignIndexMessage(int oldIndex, int newIndex)
-        {
-            GameMessage msg = new GameMessage();
-            msg.DataType = GameState.DataTypeReassignID;
-            msg.index = oldIndex;
-            byte[] array = new byte[4];
-            BitConverter.GetBytes(newIndex).CopyTo(array, 0);
-            msg.SetMessage(array);
-            return msg;
-        }
+        }        
 
         private void CullEntities()
         {
@@ -390,13 +402,32 @@ namespace SpaceInvaders
 
                 foreach (IEntity entity in entities.Values)
                 {
-                    messages[clientNumber].Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
+                    if (entity != ship)
+                    {
+                        if (entity is PlayerShip)
+                        {
+                            PlayerShip ps = entity as PlayerShip;
+                            byte[] array = new byte[3];
+                            array[0] = ps.color.R;
+                            array[1] = ps.color.G;
+                            array[2] = ps.color.B;
+                            messages[clientNumber].Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position, array));
+                        }
+                        else
+                        {
+                            messages[clientNumber].Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position)); //spawn all the entities
+                        }
+                        
+                    }
                 }
 
                 foreach (KeyValuePair<int, List<GameMessage>> kvp in messages)
-                {
-                    if (kvp.Key != clientNumber)
-                        kvp.Value.Add(GameState.SpawnMessage(0, clientShipIndex, ship.Position));
+                {                   
+                    byte[] array = new byte[3];
+                    array[0] = shipColors[clientShipIndex % 16].R;
+                    array[1] = shipColors[clientShipIndex % 16].G;
+                    array[2] = shipColors[clientShipIndex % 16].B;
+                    kvp.Value.Add(GameState.SpawnMessage(0, clientShipIndex, ship.Position, array));                
                 }
 
                 GameMessage initMessage = new GameMessage();

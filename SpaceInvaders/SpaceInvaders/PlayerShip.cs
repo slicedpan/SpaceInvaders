@@ -26,6 +26,7 @@ namespace SpaceInvaders
         }
         public PlayerShip()
         {
+            color = Color.White;
             mass = 10.0f;
         }
         public override int typeID
