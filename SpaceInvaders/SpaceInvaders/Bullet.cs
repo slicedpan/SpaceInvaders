@@ -61,6 +61,11 @@ namespace SpaceInvaders
         {
             if (other == owner)
                 return;
+            IDamageable damageableOther = other as IDamageable;
+            if (damageableOther != null)
+            {
+                damageableOther.TakeDamage(10);
+            }
             active = false;
         }
         #region IRemovable Members

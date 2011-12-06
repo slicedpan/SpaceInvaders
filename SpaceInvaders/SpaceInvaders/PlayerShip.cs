@@ -17,6 +17,14 @@ namespace SpaceInvaders
         int health = 100;
         List<IEntity> _creationList;
         KeyboardState _lastState = new KeyboardState();
+        ClientState _clientState;
+        public ClientState ClientState
+        {
+            set
+            {
+                _clientState = value;
+            }
+        }
         public List<IEntity> CreationList
         {
             set
@@ -112,6 +120,10 @@ namespace SpaceInvaders
         public void TakeDamage(int amount)
         {
             health -= amount;
+            if (_clientState != null)
+            {
+
+            }
             if (health < 0)
                 Die();
         }
