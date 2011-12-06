@@ -108,7 +108,7 @@ namespace SpaceInvaders
             createdEntities.Add(new EnemyShip());
         }
 
-        public override int AddEntity(IEntity entityToAdd)
+        public override void AddEntity(int ID, IEntity entityToAdd)
         {
             flatList.Add(entityToAdd);
             if (entityToAdd is IAIControlled)
@@ -116,13 +116,13 @@ namespace SpaceInvaders
                 var AI = entityToAdd as IAIControlled;
                 AI.creationList = createdEntities;
                 AIControlledEntities.Add(AI);
-                
+
             }
             if (entityToAdd is IRemovable)
             {
                 removableEntities.Add(entityToAdd as IRemovable);
             }
-            return base.AddEntity(entityToAdd);
+            base.AddEntity(ID, entityToAdd);
         }
 
         public override void RemoveEntity(IEntity entityToRemove)
@@ -232,7 +232,15 @@ namespace SpaceInvaders
                         {
                             //_infoStack.Push(String.Format("Entity {0} queried, sending info", message.index));
                             if (entities.Keys.Contains<int>(message.index))
+                            {
+                                _infoStack.Push(String.Format("Received query for entity {0}:{1}", message.index, entities[message.index].GetType().ToString()));
                                 messages[kvp.Key].Add(GameState.SpawnMessage(entities[message.index].typeID, message.index, entities[message.index].Position));
+                            }
+                            else
+                            {
+                                _infoStack.Push(String.Format("Received query for entity {0}, does not exist, sending despawn message", message.index));
+                                messages[kvp.Key].Add(GameState.DespawnMessage(message.index));
+                            }
                         }
                         else if (message.DataType == GameState.DataTypeRequest)
                         {
@@ -255,12 +263,40 @@ namespace SpaceInvaders
                         else
                         {
                             //_infoStack.Push(String.Format("Entity {0} Update Received, DataType {1}", message.index, message.DataType));
-                            if (message.Message != null)
-                                HandleEntityUpdates(message, true);
+                            if (message.DataType == GameState.DataTypeSpawnEntity)
+                            {
+                                _infoStack.Push(String.Format("Spawning entity. index: {0}, typeID: {1}", message.index, BitConverter.ToInt32(message.Message, 0)));
+                                if (entities.Keys.Contains<int>(message.index))
+                                {
+                                    int nextID = GetNextID();
+                                    messages[kvp.Key].Add(ReassignIndexMessage(message.index, nextID));
+                                    Spawn(nextID, BitConverter.ToInt32(message.Message, 0), new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8)));
+                                }
+                                else
+                                {
+                                    HandleEntityUpdates(message, true);
+                                }
+                            }
+                            else
+                            {
+                                if (message.Message != null)
+                                    HandleEntityUpdates(message, true);
+                            }
                         }
                     }
                 }
             }
+        }
+
+        GameMessage ReassignIndexMessage(int oldIndex, int newIndex)
+        {
+            GameMessage msg = new GameMessage();
+            msg.DataType = GameState.DataTypeReassignID;
+            msg.index = oldIndex;
+            byte[] array = new byte[4];
+            BitConverter.GetBytes(newIndex).CopyTo(array, 0);
+            msg.SetMessage(array);
+            return msg;
         }
 
         private void CullEntities()
@@ -271,6 +307,7 @@ namespace SpaceInvaders
                 if (removableEntities[i].isReadyToRemove)
                 {
                     toBeRemoved.Add(removableEntities[i]);
+                    _infoStack.Push(String.Format("Removing entity {0}:{1}", (removableEntities[i] as IEntity).ID, removableEntities[i].GetType().ToString()));
                     RemoveEntity(removableEntities[i] as IEntity);
                 }
             }

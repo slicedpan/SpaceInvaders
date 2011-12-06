@@ -22,15 +22,14 @@ namespace SpaceInvaders
         public const ushort DataTypeDespawnEntity = 5;
         public const ushort DataTypeEntityQuery = 4;
         public const ushort DataTypeRequest = 6;
+        public const ushort DataTypeReassignID = 7;
 
         protected Dictionary<int, IEntity> entities;
         protected List<PhysicalEntity> physicalEntities;
 
         protected ContentManager _contentManager;
 
-
-
-        ushort counter = 0;
+        int counter = 0;
 
         public void AddTestEntities()
         {
@@ -40,15 +39,25 @@ namespace SpaceInvaders
         public virtual void AddEntity(int ID, IEntity entityToAdd)
         {            
             entities.Add(ID, entityToAdd);
+            if (counter <= ID)
+                counter = ID + 1;
             entityToAdd.ID = ID;
             if (entityToAdd is PhysicalEntity)
                 physicalEntities.Add(entityToAdd as PhysicalEntity);
         }
         public virtual int AddEntity(IEntity entityToAdd)
         {
-            AddEntity(counter, entityToAdd);
-            ++counter;
-            return counter - 1;   
+            int id = GetNextID();   
+            AddEntity(id, entityToAdd);
+            return id;   
+        }
+        public int GetNextID()
+        {
+            while (entities.Keys.Contains<int>(counter))
+                ++counter;
+            counter++;
+            return counter - 1;
+
         }
         public virtual void RemoveEntity(IEntity entityToRemove)
         {
@@ -114,7 +123,9 @@ namespace SpaceInvaders
             else
             {
                 if (!entities.Keys.Contains<int>(message.index))
-                    AddEntity(message.index, new DummyEntity());
+                {
+                    //AddEntity(message.index, new DummyEntity());
+                }
                 entities[message.index].HandleMessage(message, strict);
             }
         }
@@ -142,7 +153,7 @@ namespace SpaceInvaders
         {
             RemoveEntity(entities[index]);
         }
-        private void Spawn(int index, int p, Vector2 position)
+        public void Spawn(int index, int p, Vector2 position)
         {
             if (entities.Keys.Contains<int>(index))
             {
@@ -155,6 +166,9 @@ namespace SpaceInvaders
                     return;
                 }
             }
+
+            if (counter <= index)
+                counter = index + 1;
 
             switch (p)
             {
@@ -174,6 +188,14 @@ namespace SpaceInvaders
                     AddEntity(index, bullet);
                     break;
             }            
+        }
+        protected void ReassignID(int oldIndex, int newIndex)
+        {
+            if (!entities.Keys.Contains<int>(oldIndex))
+                return;
+            IEntity entity = entities[oldIndex];
+            RemoveEntity(entity);
+            AddEntity(newIndex, entity);            
         }
     }
 }

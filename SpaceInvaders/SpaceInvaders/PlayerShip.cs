@@ -15,6 +15,15 @@ namespace SpaceInvaders
         Texture2D sprite;
         public Color color;
         int health = 100;
+        List<IEntity> _creationList;
+        KeyboardState _lastState = new KeyboardState();
+        public List<IEntity> CreationList
+        {
+            set
+            {
+                _creationList = value;
+            }
+        }
         public PlayerShip()
         {
             mass = 10.0f;
@@ -64,6 +73,11 @@ namespace SpaceInvaders
                 Velocity.Y += 2.0f;
                 RequiresUpdate = true;
             }
+            if (ks.IsKeyDown(Keys.Space) && !_lastState.IsKeyDown(Keys.Space))
+            {
+                Fire();
+            }
+            _lastState = ks;
         }
         public override void HandleMessage(GameMessage message, bool strict)
         {
@@ -103,6 +117,17 @@ namespace SpaceInvaders
         void Die()
         {
 
+        }
+        void Fire()
+        {
+            if (_creationList != null)
+            {
+                Bullet bullet = new Bullet(this);
+                bullet.Place(this.Position + new Vector2(0.0f, -10.0f));
+                bullet.Velocity = new Vector2(0.0f, -20.0f);
+                _creationList.Add(bullet);
+
+            }
         }
     }
 }

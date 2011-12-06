@@ -108,6 +108,7 @@ namespace SpaceInvaders
                 foreach (IEntity entity in createdEntities)
                 {
                     int newIndex = AddEntity(entity);
+                    //clientControlled.Add(entity);
                     _messages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
                 }
                 createdEntities.Clear();
@@ -135,9 +136,7 @@ namespace SpaceInvaders
                 if (msg != null)
                     HandleMessage(msg);
             }
-            base.Update(gameTime);
-
-           
+            base.Update(gameTime);           
         }
 
         public override void AddEntity(int ID, IEntity entityToAdd)
@@ -156,14 +155,6 @@ namespace SpaceInvaders
             if (ship != null)
             {
                 ship.InjectInput(keyboardState, mouseState);
-            }
-            else
-            {
-                if (entities.Keys.Contains<int>(playerIndex))
-                {
-                    ship = entities[playerIndex] as PlayerShip;
-                    _infoStack.Push("Ship attached");
-                }
             }
         }
 
@@ -249,10 +240,7 @@ namespace SpaceInvaders
                         _infoStack.Push(String.Format("Player Initialised, ship index: {0}", playerIndex));
                         if (entities.Keys.Contains<int>(playerIndex))
                         {
-                            ship = entities[playerIndex] as PlayerShip;
-                            clientControlled.Add(ship);
-                            _infoStack.Push("Ship attached");
-                            ship.color = new Color((int)message.Message[4], (int)message.Message[5], (int)message.Message[6]);
+                            InitialiseShip(message);
                         }
                         else
                             Query(playerIndex);
@@ -267,13 +255,18 @@ namespace SpaceInvaders
                 {
                     HandleEntityUpdates(message, true);
                 }
+                else if (message.DataType == DataTypeReassignID)
+                {
+                    int newIndex = BitConverter.ToInt32(message.Message, 0);
+                    _infoStack.Push(String.Format("Reassigning object {0}:{1} to ID {2}", entities[message.index].GetType().ToString(), message.index, newIndex));
+                    ReassignID(message.index, newIndex);
+                }
                 else
                 {
                     if (entities.Keys.Contains<int>(message.index))
                     {
                         //_infoStack.Push(String.Format("Entity {0} Update Received, DataType {1}", message.index, message.DataType));
                         HandleEntityUpdates(message, false);
-                        
                     }
                     else
                     {
@@ -282,6 +275,15 @@ namespace SpaceInvaders
                     }
                 }
             }
+        }
+
+        private void InitialiseShip(GameMessage message)
+        {
+            ship = entities[playerIndex] as PlayerShip;
+            clientControlled.Add(ship);
+            _infoStack.Push("Ship attached");
+            ship.color = new Color((int)message.Message[4], (int)message.Message[5], (int)message.Message[6]);
+            ship.CreationList = createdEntities;
         }
         void Query(int index)
         {          

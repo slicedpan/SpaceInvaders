@@ -59,11 +59,14 @@ namespace SpaceInvaders
         public GameMessage GetStateMessage()
         {
             GameMessage msg = new GameMessage();
-            byte[] array = new byte[8];
+            byte[] array = new byte[20];
             msg.index = (ushort)_id;
             msg.DataType = GameState.DataTypeEntityUpdate;
             BitConverter.GetBytes(_position.X).CopyTo(array, 0);
             BitConverter.GetBytes(_position.Y).CopyTo(array, 4);
+            BitConverter.GetBytes((float)0.0f).CopyTo(array, 8);
+            BitConverter.GetBytes((float)0.0f).CopyTo(array, 12);
+            BitConverter.GetBytes((float)0.0f).CopyTo(array, 16);
             msg.SetMessage(array);
             return msg;
         }
