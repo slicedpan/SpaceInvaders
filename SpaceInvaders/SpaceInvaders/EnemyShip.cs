@@ -17,6 +17,7 @@ namespace SpaceInvaders
         double nextFire = -1.0d;
         double fireRate = 0.5d;
         List<IEntity> _createList;
+        Color color = Color.Red;
 
         public override float MaxSpeed
         {
@@ -53,8 +54,8 @@ namespace SpaceInvaders
         }
         public override void Draw(GameTime gameTime)
         {
-            Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + sprite.Height / 2, sprite.Width, sprite.Height);
-            Game1.SpriteBatch.Draw(sprite, rect, Color.White);
+            Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + 2 * sprite.Height, sprite.Width, sprite.Height);
+            Game1.SpriteBatch.Draw(sprite, rect, color);
         }   
 
         public void Think(GameTime gameTime)
@@ -79,11 +80,39 @@ namespace SpaceInvaders
             }            
         }
 
+        public override void HandleSpawnMessage(GameMessage message)
+        {
+            HandleMessage(message, true);
+            color.R = message.Message[20];
+            color.G = message.Message[21];
+            color.B = message.Message[22];
+        }
+
+        public override GameMessage GetSpawnMessage()
+        {
+            GameMessage msg = new GameMessage();
+            msg.DataType = GameState.DataTypeSpawnEntity;
+            msg.index = ID;
+            byte[] array = new byte[23];
+            BitConverter.GetBytes(Position.X).CopyTo(array, 0);
+            BitConverter.GetBytes(Position.Y).CopyTo(array, 4);
+            BitConverter.GetBytes(Velocity.X).CopyTo(array, 8);
+            BitConverter.GetBytes(Velocity.Y).CopyTo(array, 12);
+            BitConverter.GetBytes(typeID).CopyTo(array, 16);
+            array[20] = color.R;
+            array[21] = color.G;
+            array[22] = color.B;
+            msg.SetMessage(array);
+            return msg;
+        }
+
         void Fire()
         {
             if (_createList != null)
             {
-                var bullet = new Bullet(this);
+                var bullet = new Bullet();
+                bullet.ownerID = ID;
+                bullet.color = this.color;
                 bullet.Place(_position + new Vector2(0.0f, 1.0f));
                 bullet.Velocity = new Vector2(0.0f, 20.0f);
                 _createList.Add(bullet);

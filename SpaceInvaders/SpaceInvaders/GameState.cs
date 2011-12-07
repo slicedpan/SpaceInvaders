@@ -106,7 +106,7 @@ namespace SpaceInvaders
             physicalEntities = new List<PhysicalEntity>();
         }
 
-        public void Draw(GameTime gameTime)
+        public virtual void Draw(GameTime gameTime)
         {
             foreach (IEntity entity in entities.Values)
             {
@@ -137,31 +137,7 @@ namespace SpaceInvaders
                 entities[message.index].HandleMessage(message, strict);
             }
         }
-        public static GameMessage SpawnMessage(int entityType, int entityID, Vector2 position)
-        {
-            GameMessage msg = new GameMessage();
-            msg.DataType = DataTypeSpawnEntity;
-            msg.index = entityID;
-            byte[] array = new byte[12];
-            BitConverter.GetBytes(entityType).CopyTo(array, 0);
-            BitConverter.GetBytes(position.X).CopyTo(array, 4);
-            BitConverter.GetBytes(position.Y).CopyTo(array, 8);
-            msg.SetMessage(array);
-            return msg;
-        }
-        public static GameMessage SpawnMessage(int entityType, int entityID, Vector2 position, byte[] extra)
-        {
-            GameMessage msg = new GameMessage();
-            msg.DataType = DataTypeSpawnEntity;
-            msg.index = entityID;
-            byte[] array = new byte[12 + extra.Length];
-            BitConverter.GetBytes(entityType).CopyTo(array, 0);
-            BitConverter.GetBytes(position.X).CopyTo(array, 4);
-            BitConverter.GetBytes(position.Y).CopyTo(array, 8);
-            extra.CopyTo(array, 12);
-            msg.SetMessage(array);
-            return msg;
-        }
+
         public static GameMessage DespawnMessage(int index)
         {
             GameMessage msg = new GameMessage();
@@ -177,8 +153,7 @@ namespace SpaceInvaders
         public void Spawn(GameMessage message)
         {
             int index = message.index;
-            int p = BitConverter.ToInt32(message.Message, 0);
-            Vector2 position = new Vector2(BitConverter.ToSingle(message.Message, 4), BitConverter.ToSingle(message.Message, 8));
+            int p = BitConverter.ToInt32(message.Message, 16);
             if (entities.Keys.Contains<int>(index))
             {
                 if (entities[index].typeID == -1)
@@ -197,32 +172,19 @@ namespace SpaceInvaders
             switch (p)
             {
                 case 0:
-                    var ship = new PlayerShip();
-                    ship.Position = position;
+                    var ship = new PlayerShip();                    
+                    ship.HandleSpawnMessage(message);
                     AddEntity(index, ship);
-                    if (message.Message.Length > 12)
-                        ship.color = Utils.ColorFromBytes(message.Message, 12);
                     break;
                 case 1:
                     var enemyShip = new EnemyShip();
-                    enemyShip.Position = position;
+                    enemyShip.HandleSpawnMessage(message);
                     AddEntity(index, enemyShip);
                     break;
-                case 2:
-                    if (message.Message.Length > 12)
-                    {
-                        var owner = entities[BitConverter.ToInt32(message.Message, 12)];
-                        var bullet = new Bullet(owner);
-                        bullet.Place(position);
-                        bullet.Velocity = new Vector2(BitConverter.ToSingle(message.Message, 16), BitConverter.ToSingle(message.Message, 20));
-                        AddEntity(index, bullet);
-                    }
-                    else
-                    {
-                        var bullet = new Bullet(new DummyEntity());
-                        bullet.Place(position);
-                        AddEntity(index, bullet);
-                    }
+                case 2:                    
+                    var bullet = new Bullet();
+                    bullet.HandleSpawnMessage(message);
+                    AddEntity(index, bullet);
                     break;
             }            
         }

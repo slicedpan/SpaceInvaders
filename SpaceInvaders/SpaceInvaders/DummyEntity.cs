@@ -60,7 +60,7 @@ namespace SpaceInvaders
         {
             GameMessage msg = new GameMessage();
             byte[] array = new byte[20];
-            msg.index = (ushort)_id;
+            msg.index = _id;
             msg.DataType = GameState.DataTypeEntityUpdate;
             BitConverter.GetBytes(_position.X).CopyTo(array, 0);
             BitConverter.GetBytes(_position.Y).CopyTo(array, 4);
@@ -68,6 +68,18 @@ namespace SpaceInvaders
             BitConverter.GetBytes((float)0.0f).CopyTo(array, 12);
             BitConverter.GetBytes((float)0.0f).CopyTo(array, 16);
             msg.SetMessage(array);
+            return msg;
+        }
+
+        public void HandleSpawnMessage(GameMessage message)
+        {
+            HandleMessage(message, true);
+        }
+
+        public GameMessage GetSpawnMessage()
+        {
+            GameMessage msg = GetStateMessage();
+            BitConverter.GetBytes(typeID).CopyTo(msg.Message, 16);
             return msg;
         }
 

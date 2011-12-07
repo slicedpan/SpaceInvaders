@@ -36,6 +36,7 @@ namespace SpaceInvaders
         {
             color = Color.White;
             mass = 10.0f;
+            collisionRadius = 8.0f;
         }
         public override int typeID
         {
@@ -57,7 +58,7 @@ namespace SpaceInvaders
         }
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + sprite.Height / 2, sprite.Width, sprite.Height);
+            Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + sprite.Height, sprite.Width, sprite.Height);
             Game1.SpriteBatch.Draw(sprite, rect, color);            
         }
         public void InjectInput(KeyboardState ks, MouseState ms)
@@ -93,24 +94,50 @@ namespace SpaceInvaders
             Vector2 newPosition = new Vector2(BitConverter.ToSingle(message.Message, 0), BitConverter.ToSingle(message.Message, 4));
             Velocity = new Vector2(BitConverter.ToSingle(message.Message, 8), BitConverter.ToSingle(message.Message, 12));
             if (strict)
+            {
                 Position = newPosition;
+                _lastPosition = newPosition;
+            }
             else
-                Velocity += (newPosition - Position) * 0.064f;
-            Angle = BitConverter.ToSingle(message.Message, 16);             
+                Velocity += (newPosition - Position) * 0.064f;                         
         }
         public override GameMessage GetStateMessage()
         {
             GameMessage msg = new GameMessage();
             msg.DataType = GameState.DataTypeEntityUpdate;
-            msg.index = (ushort)ID;
-            byte[] array = new byte[20];           
+            msg.index = ID;
+            byte[] array = new byte[16];           
             BitConverter.GetBytes(Position.X).CopyTo(array, 0);
             BitConverter.GetBytes(Position.Y).CopyTo(array, 4);
             BitConverter.GetBytes(Velocity.X).CopyTo(array, 8);
             BitConverter.GetBytes(Velocity.Y).CopyTo(array, 12);
-            BitConverter.GetBytes(Angle).CopyTo(array, 16);
             msg.SetMessage(array);
             return msg;
+        }
+        public override GameMessage GetSpawnMessage()
+        {
+            GameMessage msg = new GameMessage();
+            msg.DataType = GameState.DataTypeSpawnEntity;
+            msg.index = ID;
+            byte[] array = new byte[23];
+            BitConverter.GetBytes(typeID).CopyTo(array, 16);
+            BitConverter.GetBytes(Position.X).CopyTo(array, 0);
+            BitConverter.GetBytes(Position.Y).CopyTo(array, 4);
+            BitConverter.GetBytes(Velocity.X).CopyTo(array, 8);
+            BitConverter.GetBytes(Velocity.Y).CopyTo(array, 12);
+            BitConverter.GetBytes(typeID).CopyTo(array, 16);
+            array[20] = color.R;
+            array[21] = color.G;
+            array[22] = color.B;
+            msg.SetMessage(array);
+            return msg;
+        }
+        public override void HandleSpawnMessage(GameMessage message)
+        {
+            HandleMessage(message, true);
+            color.R = message.Message[20];
+            color.G = message.Message[21];
+            color.B = message.Message[22];
         }
         public override void Update(GameTime gameTime)
         {
@@ -135,7 +162,9 @@ namespace SpaceInvaders
         {
             if (_creationList != null)
             {
-                Bullet bullet = new Bullet(this);
+                Bullet bullet = new Bullet();
+                bullet.ownerID = ID;
+                bullet.color = this.color;
                 bullet.Place(this.Position + new Vector2(0.0f, -10.0f));
                 bullet.Velocity = new Vector2(0.0f, -20.0f);
                 _creationList.Add(bullet);

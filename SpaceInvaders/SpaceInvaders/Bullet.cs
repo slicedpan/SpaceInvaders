@@ -13,14 +13,8 @@ namespace SpaceInvaders
     {
         Texture2D sprite;
         bool active = true;
-        IEntity owner;
-        public IEntity Owner
-        {
-            get
-            {
-                return owner;
-            }
-        }
+        public Color color = Color.Red;
+        public int ownerID;
         public override float MaxSpeed
         {
             get
@@ -28,10 +22,10 @@ namespace SpaceInvaders
                 return 50.0f;
             }
         }
-        public Bullet(IEntity owner)
+        public Bullet()
         {
             Friction = 0.0f;
-            this.owner = owner;
+            collisionRadius = 4.0f;
         }
         public override int typeID
         {
@@ -42,7 +36,7 @@ namespace SpaceInvaders
         }
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            Game1.SpriteBatch.Draw(sprite, Position, Color.White);
+            Game1.SpriteBatch.Draw(sprite, Position, color);
         }
         public override void LoadContent(ContentManager Content)
         {
@@ -59,7 +53,7 @@ namespace SpaceInvaders
         }
         public override void Collide(PhysicalEntity other)
         {
-            if (other == owner)
+            if (other.ID == ownerID || other is Bullet)
                 return;
             IDamageable damageableOther = other as IDamageable;
             if (damageableOther != null)
@@ -68,23 +62,36 @@ namespace SpaceInvaders
             }
             active = false;
         }
-        #region IRemovable Members
 
-        public GameMessage GetSpawnMessage(int ownerID)
+        public override void HandleSpawnMessage(GameMessage message)
+        {
+            HandleMessage(message, true);
+            ownerID = BitConverter.ToInt32(message.Message, 20);
+            color.R = message.Message[24];
+            color.G = message.Message[25];
+            color.B = message.Message[26];
+        }
+
+        public override GameMessage GetSpawnMessage()
         {
             GameMessage msg = new GameMessage();
             msg.DataType = GameState.DataTypeSpawnEntity;
             msg.index = ID;
-            byte[] array = new byte[24];
-            BitConverter.GetBytes(typeID).CopyTo(array, 0);
-            BitConverter.GetBytes(_position.X).CopyTo(array, 4);
-            BitConverter.GetBytes(_position.Y).CopyTo(array, 8);
-            BitConverter.GetBytes(ownerID).CopyTo(array, 12);
-            BitConverter.GetBytes(Velocity.X).CopyTo(array, 16);
-            BitConverter.GetBytes(Velocity.Y).CopyTo(array, 20);               
+            byte[] array = new byte[27];
+            BitConverter.GetBytes(Position.X).CopyTo(array, 0);
+            BitConverter.GetBytes(Position.Y).CopyTo(array, 4);
+            BitConverter.GetBytes(Velocity.X).CopyTo(array, 8);
+            BitConverter.GetBytes(Velocity.Y).CopyTo(array, 12);
+            BitConverter.GetBytes(typeID).CopyTo(array, 16);
+            BitConverter.GetBytes(ownerID).CopyTo(array, 20);
+            array[24] = color.R;
+            array[25] = color.G;
+            array[26] = color.B;
             msg.SetMessage(array);
             return msg;
         }
+
+        #region IRemovable Members
 
         public bool isReadyToRemove
         {

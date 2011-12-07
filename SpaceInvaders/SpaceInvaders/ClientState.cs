@@ -26,6 +26,7 @@ namespace SpaceInvaders
         List<int> queries = new List<int>();
         List<IEntity> createdEntities = new List<IEntity>();
         Color shipColor = Color.White;
+        List<IEntity> clientSide = new List<IEntity>();
 
         #region accessors
 
@@ -99,7 +100,9 @@ namespace SpaceInvaders
             if (secondCounter > 1000.0d)
             {
                 if (ship != null)
+                {
                     //_infoStack.Push("Ship pos: " + ship.Position.ToString());
+                }
                 secondCounter = 0.0d;
             }
 
@@ -108,17 +111,7 @@ namespace SpaceInvaders
                 foreach (IEntity entity in createdEntities)
                 {
                     int newIndex = AddEntity(entity);
-                    if (entity is Bullet)
-                    {
-                        Bullet bullet = entity as Bullet;
-                        int ownerIndex = GetIndex(bullet.Owner);
-                        _messages.Add(bullet.GetSpawnMessage(ownerIndex));
-                    }
-                    else
-                    {
-                        clientControlled.Add(entity);                    
-                        _messages.Add(GameState.SpawnMessage(entity.typeID, entity.ID, entity.Position));
-                    }
+                    _messages.Add(entity.GetSpawnMessage());
                 }
                 createdEntities.Clear();
             }
@@ -145,6 +138,11 @@ namespace SpaceInvaders
                 if (msg != null)
                     HandleMessage(msg);
             }
+            foreach (IEntity entity in clientSide)
+            {
+                entity.Update(gameTime);
+            }
+            
             base.Update(gameTime);           
         }
 
@@ -298,6 +296,16 @@ namespace SpaceInvaders
                     }
                 }
             }
+          
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            foreach (IEntity entity in clientSide)
+            {
+                entity.Draw(gameTime);
+            }
+            base.Draw(gameTime);
         }
 
         private void InitialiseShip(GameMessage message)
