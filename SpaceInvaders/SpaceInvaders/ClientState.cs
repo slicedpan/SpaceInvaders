@@ -304,7 +304,7 @@ namespace SpaceInvaders
                         if (clientControlled.Contains(entities[message.index]))
                             HandleEntityUpdates(message, false);
                         else
-                            HandleEntityUpdates(message, true);
+                            HandleEntityUpdates(message, false);
                     }
                     else
                     {

@@ -155,12 +155,9 @@ namespace SpaceInvaders
 
             if (createdEntities.Count > 0)
             {
-                foreach (IEntity entity in createdEntities)
-                {
-                    int newIndex = AddEntity(entity);                    
-                    broadcastMessages.Add(entity.GetSpawnMessage());
-                }
-                createdEntities.Clear();
+                int newIndex = AddEntity(createdEntities[0]);
+                broadcastMessages.Add(createdEntities[0].GetSpawnMessage());
+                createdEntities.Remove(createdEntities[0]);
             }
 
             CullEntities();
@@ -194,9 +191,9 @@ namespace SpaceInvaders
                         }
                         else
                         {
-                            while (messageList.Value.Count > 50)
+                            while (messageList.Value.Count > 100)
                             {
-                                messageList.Value.Remove(messageList.Value[0]);
+                                messageList.Value.Remove(messageList.Value[messageList.Value.Count - 1]);
                             }
                             Connection conn;
                             if(_server.Connections.TryGetValue(messageList.Key, out conn))

@@ -29,7 +29,7 @@ namespace SpaceInvaders
         public static SpriteFont Font;
         public static SpriteFont mbFont;
         public static UI UITex;
-        public static double updatesPerSecond = 30.0d;
+        public static double updatesPerSecond = 15.0d;
         public static Texture2D circleTex;
         public static BoundingSphere screenExtent;
         public static Random rand;
