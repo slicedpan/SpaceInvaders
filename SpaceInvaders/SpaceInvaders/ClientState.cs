@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using ONet;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
+using System.Timers;
 
 namespace SpaceInvaders
 {
@@ -27,6 +28,8 @@ namespace SpaceInvaders
         List<IEntity> createdEntities = new List<IEntity>();
         Color shipColor = Color.White;
         List<IEntity> clientSide = new List<IEntity>();
+        public MessageBox overlay;
+        Timer respawnTimer;
 
         #region accessors
 
@@ -67,13 +70,15 @@ namespace SpaceInvaders
         public ClientState()
         {
             _client = new Client();
+            respawnTimer = new Timer();
+            respawnTimer.AutoReset = true;
             _client.OnMessage = new Client.Callback(MessageCallback);
             _client.OnError = new Client.ErrorCallback(ErrorCallback);
             _client.OnConnect = new Client.Callback(ConnectCallback);
             _client.OnDisconnect = new Client.Callback(DisconnectCallback);
             _messageStack = new MessageStack<GameMessage>(50);
             _infoStack = new MessageStack<string>(10);
-            _errorStack = new MessageStack<string>(10);
+            _errorStack = new MessageStack<string>(10);            
 
             if (currentInstance == null)
                 currentInstance = this;
@@ -154,6 +159,9 @@ namespace SpaceInvaders
 
         public void LoadContent(ContentManager cm)
         {
+            overlay = new MessageBox(2, 312, 400);
+            overlay.color = Color.BlueViolet;
+            overlay.IsVisible = false;
             _contentManager = cm;
         }
 
@@ -252,6 +260,11 @@ namespace SpaceInvaders
                         else
                             Query(playerIndex);
                         break;
+                    case IndexPlayerDeath:
+                        StartRespawn();
+                        break;
+                    case IndexGameOver:
+                        break;
                 }
             }
             else
@@ -260,7 +273,11 @@ namespace SpaceInvaders
                 {
                     _infoStack.Push("Despawn called for entity: " + message.index.ToString());
                     if (entities.Keys.Contains<int>(message.index))
+                    {
+                        if (entities[message.index] == ship)
+                            ship = null;
                         RemoveEntity(entities[message.index]);
+                    }
                 }
                 else if (message.DataType == DataTypeSpawnEntity)
                 {
@@ -295,8 +312,41 @@ namespace SpaceInvaders
                         Query(message.index);
                     }
                 }
+            }          
+        }
+
+        int respawnCounter = 0;
+
+        void StartRespawn()
+        {
+            overlay.IsVisible = true;
+            overlay.AddMessage("Respawn in 10...");
+            respawnCounter = 10;
+            respawnTimer.Interval = 1000.0d;
+            respawnTimer.Start();
+            respawnTimer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+        }
+
+        void GameOver()
+        {
+            overlay.IsVisible = true;
+            overlay.AddMessage("Game Over!");
+        }
+
+        void Respawn()
+        {
+
+        }
+
+        void timer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            --respawnCounter;
+            overlay.AddMessage(String.Format("Respawn in {0}...", respawnCounter));
+            if (respawnCounter == 0)
+            {
+                respawnTimer.Stop();
+                Respawn();
             }
-          
         }
 
         public override void Draw(GameTime gameTime)

@@ -32,6 +32,14 @@ namespace SpaceInvaders
                 _creationList = value;
             }
         }
+        bool _isDead = false;
+        public bool isDead
+        {
+            get
+            {
+                return _isDead;
+            }
+        }
         public PlayerShip()
         {
             color = Color.White;
@@ -156,7 +164,7 @@ namespace SpaceInvaders
         }
         void Die()
         {
-
+            _isDead = true;
         }
         void Fire()
         {
@@ -165,7 +173,7 @@ namespace SpaceInvaders
                 Bullet bullet = new Bullet();
                 bullet.ownerID = ID;
                 bullet.color = this.color;
-                bullet.Place(this.Position + new Vector2(0.0f, -10.0f));
+                bullet.Place(this.Position + new Vector2(0.0f, -14.0f));
                 bullet.Velocity = new Vector2(0.0f, -20.0f);
                 _creationList.Add(bullet);
 

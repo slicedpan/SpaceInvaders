@@ -10,17 +10,16 @@ namespace SpaceInvaders
 {
     public class Window
     {
-        int _width, _height, _x, _y;
-        Color _color;
+        int _width, _height, _x, _y;        
         Rectangle left, right, bottom, top, bg, tlcorner, brcorner, trcorner, blcorner;
         Texture2D borderBottom, borderTop, cornerBottom, cornerTop, borderLeft, background;
-        public Window(Color color)
+        public Window()
         {
             _width = 100;
             _height = 100;
             _x = 100;
             _y = 100;
-            _color = color;
+
             CalculateBorderPositions();
             borderBottom = Game1.UITex.topbotBorder;
             borderTop = Game1.UITex.topbotBorder;
@@ -30,17 +29,17 @@ namespace SpaceInvaders
             background = Game1.UITex.background;
         }
 
-        public void Draw(SpriteBatch sb)
+        public void Draw(SpriteBatch sb, Color color)
         {
-            sb.Draw(background, bg, _color);
-            sb.Draw(borderBottom, bottom, _color);
-            sb.Draw(borderTop, top, _color);
-            sb.Draw(borderLeft, left, _color);
-            sb.Draw(borderLeft, right, _color);
-            sb.Draw(cornerBottom, blcorner, _color);
-            sb.Draw(cornerTop, tlcorner, _color);
-            sb.Draw(cornerBottom, brcorner, null, _color, 0.0f, Vector2.Zero, SpriteEffects.FlipHorizontally, 0.0f);
-            sb.Draw(cornerTop, trcorner, null, _color, 0.0f, Vector2.Zero, SpriteEffects.FlipHorizontally, 0.0f);
+            sb.Draw(background, bg, color);
+            sb.Draw(borderBottom, bottom, color);
+            sb.Draw(borderTop, top, color);
+            sb.Draw(borderLeft, left, color);
+            sb.Draw(borderLeft, right, color);
+            sb.Draw(cornerBottom, blcorner, color);
+            sb.Draw(cornerTop, tlcorner, color);
+            sb.Draw(cornerBottom, brcorner, null, color, 0.0f, Vector2.Zero, SpriteEffects.FlipHorizontally, 0.0f);
+            sb.Draw(cornerTop, trcorner, null, color, 0.0f, Vector2.Zero, SpriteEffects.FlipHorizontally, 0.0f);
         }
         public void SetPosition(int x, int y)
         {

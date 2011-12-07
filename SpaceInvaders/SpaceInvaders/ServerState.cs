@@ -14,6 +14,7 @@ namespace SpaceInvaders
         double lastTime;
         Dictionary<int, List<GameMessage>> messages = new Dictionary<int,List<GameMessage>>();
         Dictionary<int, double> lastMessage = new Dictionary<int,double>();
+        Dictionary<int, PlayerShip> ships = new Dictionary<int, PlayerShip>();
         List<GameMessage> broadcastMessages = new List<GameMessage>();
         public GameMessage CurrentBundle;
         double updateCounter = 0.0d;
@@ -22,6 +23,9 @@ namespace SpaceInvaders
         Dictionary<int, PlayerInfo> playerInfo;
         Dictionary<int, MessageStack<GameMessage>> _messageStacks = new Dictionary<int, MessageStack<GameMessage>>();
         public static ServerState currentInstance;
+        int numShips = 0;
+        int maxNumShips = 20;
+
         Color[] shipColors = new Color[16]
         {
             Color.Green,
@@ -49,6 +53,8 @@ namespace SpaceInvaders
         List<IEntity> createdEntities = new List<IEntity>();
         List<IAIControlled> AIControlledEntities = new List<IAIControlled>();
         List<IRemovable> removableEntities = new List<IRemovable>();
+
+        Random rand;
 
         #region accessors
 
@@ -96,6 +102,7 @@ namespace SpaceInvaders
             {
                 throw new Exception("only one instance of ServerState is allowed");
             }
+            rand = new Random();
             flatList = new List<IEntity>();
             playerInfo= new Dictionary<int, PlayerInfo>();
             _server = new GameServer();
@@ -105,7 +112,6 @@ namespace SpaceInvaders
             _server.OnError = new ONet.GameServer.ErrorCallback(ErrorMessage);
             _infoStack = new MessageStack<string>(10);
             _errorStack = new MessageStack<string>(10);
-            createdEntities.Add(new EnemyShip());
         }
 
         public override void AddEntity(int ID, IEntity entityToAdd)
@@ -128,6 +134,10 @@ namespace SpaceInvaders
         public override void RemoveEntity(IEntity entityToRemove)
         {
             broadcastMessages.Add(GameState.DespawnMessage(entityToRemove.ID));
+            if (entityToRemove is IAIControlled)
+            {
+                AIControlledEntities.Remove(entityToRemove as IAIControlled);
+            }
             base.RemoveEntity(entityToRemove);
         }
 
@@ -147,7 +157,7 @@ namespace SpaceInvaders
             {
                 foreach (IEntity entity in createdEntities)
                 {
-                    int newIndex = AddEntity(entity);
+                    int newIndex = AddEntity(entity);                    
                     broadcastMessages.Add(entity.GetSpawnMessage());
                 }
                 createdEntities.Clear();
@@ -159,6 +169,13 @@ namespace SpaceInvaders
 
             if (updateCounter > (1000.0d / Game1.updatesPerSecond))
             {
+                if (numShips < maxNumShips)
+                {
+                    var ship = new EnemyShip();
+                    ship.Place(new Vector2(rand.Next(Game1.width), rand.Next(Game1.height)));
+                    createdEntities.Add(ship);
+                    ++numShips;
+                }
                 foreach (IEntity entity in entities.Values)
                 {
                     if (entity.RequiresUpdate)
@@ -378,6 +395,9 @@ namespace SpaceInvaders
                 PlayerShip ship = new PlayerShip();
                 int clientShipIndex = AddEntity(ship);
                 ship.Place(new Vector2(Game1.width / 2.0f, Game1.height - 20.0f));
+                ship.color = shipColors[clientNumber % 16];
+
+                ships.Add(clientNumber, ship);
 
                 foreach (IEntity entity in entities.Values)
                 {
@@ -398,9 +418,9 @@ namespace SpaceInvaders
                 byte[] arr = new byte[7];
                 BitConverter.GetBytes(clientShipIndex).CopyTo(arr, 0);
 
-                arr[4] = shipColors[clientShipIndex % 16].R;
-                arr[5] = shipColors[clientShipIndex % 16].G;
-                arr[6] = shipColors[clientShipIndex % 16].B;
+                arr[4] = shipColors[clientNumber % 16].R;
+                arr[5] = shipColors[clientNumber % 16].G;
+                arr[6] = shipColors[clientNumber % 16].B;
 
                 initMessage.SetMessage(arr);
                 messages[clientNumber].Add(initMessage);

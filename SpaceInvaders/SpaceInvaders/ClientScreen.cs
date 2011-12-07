@@ -83,6 +83,12 @@ namespace SpaceInvaders
 
             clientBox.Draw();
             serverBox.Draw();
+
+            if (clientState.overlay != null)
+            {
+                clientState.overlay.Draw();
+            }
+
             Game1.SpriteBatch.End();
         }
 
