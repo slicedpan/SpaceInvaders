@@ -16,18 +16,20 @@ namespace SpaceInvaders
         Rectangle _rect;
         Window bgWindow;
         int messageCounter = 10;
+        public Color color = Color.Red;
         public MessageBox(int lines, int X, int Y)
         {
-            messages = new List<string>();
+            messages = new List<string>();            
             _maxLines = lines;
             _X = X;
             _Y = Y;
             _width = 400;
             _height = lines * 11 + 16;
             _rect = new Rectangle(_X, _Y, _width, _height);
-            bgWindow = new Window(new Color(255, 35, 0));
+            bgWindow = new Window();
             bgWindow.SetPosition(_X + (_width / 2), _Y + (_height / 2));
             bgWindow.SetSize(_width, _height);
+            Init();
         }
         public MessageBox(Rectangle size)
         {
@@ -37,9 +39,17 @@ namespace SpaceInvaders
             _height = size.Height;
             _rect = size;
             _maxLines = (int)Math.Floor((_height - 16) / 11.0d);
-            bgWindow = new Window(new Color(255, 35, 0));
+            bgWindow = new Window();
             bgWindow.SetPosition(_X, _Y);
             bgWindow.SetSize(_width, _height);
+            Init();
+        }
+        void Init()
+        {
+            for (int i = 0; i < _maxLines; ++i)
+            {
+                messages.Add("");
+            }
         }
         public void SpriteDraw()
         {
@@ -52,10 +62,11 @@ namespace SpaceInvaders
         {
             if (IsVisible)
             {
-                bgWindow.Draw(Game1.SpriteBatch);
+                bgWindow.Draw(Game1.SpriteBatch, color);
                 for (int i = 0; i < messages.Count; ++i)
                 {
-                    Game1.SpriteBatch.DrawString(Game1.mbFont, String.Format("{0} - {1}", messageCounter - 10 + i, messages[i]), new Vector2(_X + 8, _Y + (i * 11) + 3), Color.White);
+                    if (messages[i] != "")
+                        Game1.SpriteBatch.DrawString(Game1.mbFont, String.Format("{0} - {1}", messageCounter - 18 + i, messages[i]), new Vector2(_X + 8, _Y + (i * 11) + 3), Color.White * (0.4f + (i * 0.06f)));                    
                 }
             }
         }

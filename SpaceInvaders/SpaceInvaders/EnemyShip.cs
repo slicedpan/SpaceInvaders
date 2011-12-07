@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 
 namespace SpaceInvaders
 {
-    class EnemyShip : PhysicalEntity, IAIControlled, IDamageable
+    class EnemyShip : PhysicalEntity, IAIControlled, IDamageable, IRemovable
     {
         Texture2D sprite;
         Vector2 AITarget;
@@ -18,6 +18,8 @@ namespace SpaceInvaders
         double fireRate = 0.5d;
         List<IEntity> _createList;
         Color color = Color.Red;
+        int health = 40;
+        bool active = true;
 
         public override float MaxSpeed
         {
@@ -36,8 +38,8 @@ namespace SpaceInvaders
 
         public EnemyShip()
         {
-            rand = new Random();
-            AITarget = _position;
+            rand = Game1.rand;
+            AITarget = new Vector2(rand.Next(Game1.width), rand.Next(Game1.height));
             mass = 20.0f;
         }
 
@@ -112,8 +114,9 @@ namespace SpaceInvaders
             {
                 var bullet = new Bullet();
                 bullet.ownerID = ID;
+                bullet.isDown = true;
                 bullet.color = this.color;
-                bullet.Place(_position + new Vector2(0.0f, 1.0f));
+                bullet.Place(_position + new Vector2(0.0f, 18.0f));
                 bullet.Velocity = new Vector2(0.0f, 20.0f);
                 _createList.Add(bullet);
             }
@@ -136,7 +139,16 @@ namespace SpaceInvaders
 
         public void TakeDamage(int amount)
         {
-            
+            health -= amount;
+            if (health < 0)
+            {
+                active = false;
+            }
+        }
+
+        public bool isReadyToRemove
+        {
+            get { return !active; }
         }
     }
 }

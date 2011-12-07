@@ -32,9 +32,11 @@ namespace SpaceInvaders
         public static double updatesPerSecond = 30.0d;
         public static Texture2D circleTex;
         public static BoundingSphere screenExtent;
+        public static Random rand;
 
         public Game1()
         {
+            rand = new Random();
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = width;
             graphics.PreferredBackBufferHeight = height;
