@@ -308,16 +308,8 @@ namespace SpaceInvaders
                             switch (message.index)
                             {
                                 case GameState.IndexInitialisePlayerShip:
-                                    GameMessage initMessage = new GameMessage();
-                                    initMessage.DataType = GameState.DataTypeMetaInfo;
-                                    initMessage.index = GameState.IndexInitialisePlayerShip;
-                                    byte[] arr = new byte[4];
-                                    int clientID = kvp.Key;
-                                    BitConverter.GetBytes(playerInfo[clientID].EntityID).CopyTo(arr, 0);
-                                    initMessage.SetMessage(arr);
-                                    messages[kvp.Key].Add(initMessage);
-
-                                    _infoStack.Push(String.Format("Initialisation request from client {0}, ship index {1}", clientID, playerInfo[clientID].EntityID));
+                                    InitialisePlayerShip(kvp.Key);
+                                    _infoStack.Push(String.Format("Initialisation request from client {0}, ship index {1}", kvp.Key, playerInfo[kvp.Key].EntityID));
                                     break;
                                 case GameState.IndexRespawnShip:
                                     PlayerShip ship = new PlayerShip();
@@ -325,6 +317,8 @@ namespace SpaceInvaders
                                     ship.Place(new Vector2(Game1.width / 2.0f, Game1.height - 20.0f));
                                     ship.color = shipColors[kvp.Key % 16];
                                     ships.Add(kvp.Key, ship);
+                                    playerInfo[kvp.Key].EntityID = clientShipIndex;
+                                    InitialisePlayerShip(kvp.Key);
                                     break;
                             }
                         }
@@ -370,6 +364,17 @@ namespace SpaceInvaders
                     }
                 }
             }
+        }
+
+        private void InitialisePlayerShip(int clientIndex)
+        {
+            GameMessage initMessage = new GameMessage();
+            initMessage.DataType = GameState.DataTypeMetaInfo;
+            initMessage.index = GameState.IndexInitialisePlayerShip;
+            byte[] arr = new byte[4];
+            BitConverter.GetBytes(playerInfo[clientIndex].EntityID).CopyTo(arr, 0);
+            initMessage.SetMessage(arr);
+            messages[clientIndex].Add(initMessage);
         }        
 
         private void CullEntities()
