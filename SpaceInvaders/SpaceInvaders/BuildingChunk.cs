@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
+using ONet;
 
 namespace SpaceInvaders
 {
@@ -36,6 +37,7 @@ namespace SpaceInvaders
         public void TakeDamage(int amount)
         {
             health -= 10;
+            RequiresUpdate = true;
         }
 
         public bool isReadyToRemove
@@ -153,7 +155,23 @@ namespace SpaceInvaders
 
         public override ONet.GameMessage GetStateMessage()
         {
-            return base.GetStateMessage();
+            GameMessage msg = new GameMessage();
+            msg.DataType = GameState.DataTypeEntityUpdate;
+            msg.index = ID;
+            byte[] array = new byte[20];
+            BitConverter.GetBytes(Position.X).CopyTo(array, 0);
+            BitConverter.GetBytes(Position.Y).CopyTo(array, 4);
+            BitConverter.GetBytes(Velocity.X).CopyTo(array, 8);
+            BitConverter.GetBytes(Velocity.Y).CopyTo(array, 12);
+            BitConverter.GetBytes(health).CopyTo(array, 16);
+            msg.SetMessage(array);
+            return msg;
+        }
+
+        public override void HandleMessage(GameMessage message, bool strict)
+        {
+            base.HandleMessage(message, strict);
+            health = BitConverter.ToInt32(message.Message, 16);
         }
     }
 }

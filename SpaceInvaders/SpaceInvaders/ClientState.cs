@@ -30,6 +30,8 @@ namespace SpaceInvaders
         List<IEntity> clientSide = new List<IEntity>();
         public MessageBox overlay;
         Timer respawnTimer;
+        int updateCount = 0;
+        int numUpdates = 0;
 
         #region accessors
 
@@ -109,6 +111,12 @@ namespace SpaceInvaders
                 {
                     //_infoStack.Push("Ship pos: " + ship.Position.ToString());
                 }
+                int avgNo = 0;
+                if (numUpdates != 0)
+                    avgNo = (updateCount / numUpdates);
+                _infoStack.Push("Avg No. of messages per update: " + avgNo);
+                updateCount = 0;
+                numUpdates = 0;
                 secondCounter = 0.0d;
             }
 
@@ -183,6 +191,8 @@ namespace SpaceInvaders
                 if (message.DataType == GameMessage.Bundle)
                 {
                     List<GameMessage> messages = GameMessage.SplitBundle(message);
+                    updateCount += messages.Count;
+                    numUpdates += 1;
                     for (int i = 0; i < messages.Count; ++i)
                     {
                         _messageStack.Push(messages[i]);

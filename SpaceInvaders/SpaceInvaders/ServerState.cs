@@ -19,7 +19,6 @@ namespace SpaceInvaders
         public GameMessage CurrentBundle;
         double updateCounter = 0.0d;
         double secondCounter = 0.0d;
-        const double updatesPerSec = 20.0d;
         Dictionary<int, PlayerInfo> playerInfo;
         Dictionary<int, MessageStack<GameMessage>> _messageStacks = new Dictionary<int, MessageStack<GameMessage>>();
         public static ServerState currentInstance;
@@ -262,6 +261,7 @@ namespace SpaceInvaders
                 {
                     if (entity.RequiresUpdate)
                     {
+                        entity.RequiresUpdate = false;
                         broadcastMessages.Add(entity.GetStateMessage());
                     }
                 }

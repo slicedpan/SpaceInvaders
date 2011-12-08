@@ -65,8 +65,7 @@ namespace SpaceInvaders
         }
 
         public virtual void Update(GameTime gameTime)
-        {
-            requiresUpdate = false;
+        {            
             _position += Velocity;
             if ((_lastPosition - Position).Length() > 1.2f * Velocity.Length())
             {

@@ -11,6 +11,8 @@ namespace SpaceInvaders
     public class GameState
     {
 
+        protected Random rand = new Random();
+
         public const int IndexScoreUpdate = 2;
         public const int IndexHealthUpdate = 3;        
         public const int IndexSpawnEntity = 4;
@@ -42,8 +44,6 @@ namespace SpaceInvaders
         public virtual void AddEntity(int ID, IEntity entityToAdd)
         {            
             entities.Add(ID, entityToAdd);
-            if (idCounter <= ID)
-                idCounter = ID + 1;
             entityToAdd.ID = ID;
             if (entityToAdd is PhysicalEntity)
                 physicalEntities.Add(entityToAdd as PhysicalEntity);
@@ -56,10 +56,10 @@ namespace SpaceInvaders
         }
         public int GetNextID()
         {
-            while (entities.Keys.Contains<int>(idCounter))
-                ++idCounter;
-            idCounter++;
-            return idCounter - 1;
+            int newID = rand.Next(int.MinValue, int.MaxValue);
+            while (entities.Keys.Contains<int>(newID))
+                newID = rand.Next(int.MinValue, int.MaxValue);
+            return newID;
         }
 
         public int GetIndex(IEntity entity)
