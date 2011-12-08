@@ -72,6 +72,7 @@ namespace SpaceInvaders
             _client = new Client();
             respawnTimer = new Timer();
             respawnTimer.AutoReset = true;
+            respawnTimer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
             _client.OnMessage = new Client.Callback(MessageCallback);
             _client.OnError = new Client.ErrorCallback(ErrorCallback);
             _client.OnConnect = new Client.Callback(ConnectCallback);
@@ -256,7 +257,7 @@ namespace SpaceInvaders
                         if (entities.Keys.Contains<int>(playerIndex))
                         {
                             InitialiseShip(message);
-                        }
+                        }                        
                         else
                             Query(playerIndex);
                         break;
@@ -284,6 +285,10 @@ namespace SpaceInvaders
                 {
                     if (message.index > idCounter)
                         idCounter = message.index + 1;
+                    if (message.index == playerIndex)
+                    {
+                        RequestInitialisation();
+                    }
                     HandleEntityUpdates(message, true);
                 }
                 else if (message.DataType == DataTypeReassignID)
@@ -319,15 +324,19 @@ namespace SpaceInvaders
         }
 
         int respawnCounter = 0;
+        bool respawning = false;
 
         void StartRespawn()
         {
-            overlay.IsVisible = true;
-            overlay.AddMessage("Respawn in 10...");
-            respawnCounter = 10;
-            respawnTimer.Interval = 1000.0d;
-            respawnTimer.Start();
-            respawnTimer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+            if (!respawning)
+            {
+                overlay.IsVisible = true;
+                overlay.AddMessage("Respawn in 10...");
+                respawnCounter = 10;
+                respawnTimer.Interval = 1000.0d;
+                respawnTimer.Start();                
+                respawning = true;
+            }
         }
 
         void GameOver()
@@ -339,14 +348,19 @@ namespace SpaceInvaders
 
         void Respawn()
         {
-
+            GameMessage msg = new GameMessage();
+            msg.DataType = DataTypeRequest;
+            msg.index = IndexRespawnShip;
+            msg.SetMessage(new byte[1]);
+            _messages.Add(msg);
+            respawning = false;
         }
 
         void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             --respawnCounter;
             overlay.AddMessage(String.Format("Respawn in {0}...", respawnCounter));
-            if (respawnCounter == 0)
+            if (respawnCounter <= 0)
             {
                 respawnTimer.Stop();
                 Respawn();

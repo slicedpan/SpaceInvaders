@@ -24,7 +24,7 @@ namespace SpaceInvaders
         Dictionary<int, MessageStack<GameMessage>> _messageStacks = new Dictionary<int, MessageStack<GameMessage>>();
         public static ServerState currentInstance;
         int numShips = 0;
-        int maxNumShips = 20;
+        int maxNumShips = 2;
         bool gameActive = true;
 
         Color[] shipColors = new Color[16]
@@ -220,6 +220,7 @@ namespace SpaceInvaders
             {
                 ships.Remove(index);
             }
+            /*
             if (deadPlayers == numPlayers)
             {
                 GameMessage gameOverMessage = new GameMessage();
@@ -229,6 +230,7 @@ namespace SpaceInvaders
                 broadcastMessages.Add(gameOverMessage);
                 gameActive = false;
             }
+            */
         }
 
         private void UpdateClients()
@@ -312,6 +314,12 @@ namespace SpaceInvaders
                                     _infoStack.Push(String.Format("Initialisation request from client {0}, ship index {1}", kvp.Key, playerInfo[kvp.Key].EntityID));
                                     break;
                                 case GameState.IndexRespawnShip:
+
+                                    if (ships.Keys.Contains<int>(kvp.Key))
+                                    {
+                                        ships.Remove(kvp.Key);
+                                    }
+
                                     PlayerShip ship = new PlayerShip();
                                     int clientShipIndex = AddEntity(ship);
                                     ship.Place(new Vector2(Game1.width / 2.0f, Game1.height - 20.0f));
@@ -319,6 +327,7 @@ namespace SpaceInvaders
                                     ships.Add(kvp.Key, ship);
                                     playerInfo[kvp.Key].EntityID = clientShipIndex;
                                     InitialisePlayerShip(kvp.Key);
+                                    
                                     break;
                             }
                         }
