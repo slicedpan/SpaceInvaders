@@ -273,18 +273,27 @@ namespace SpaceInvaders
                         if (messageList.Value.Count == 1)
                         {
                             _server.Connections[messageList.Key].Send(messageList.Value[0]);
+                            messageList.Value.Clear();
                         }
-                        else
+                        else if (messageList.Value.Count < 100)
                         {
-                            while (messageList.Value.Count > 250)
-                            {
-                                messageList.Value.Remove(messageList.Value[messageList.Value.Count - 1]);
-                            }
                             Connection conn;
                             if (_server.Connections.TryGetValue(messageList.Key, out conn))
                                 conn.Send(GameMessage.MessageBundle(messageList.Value));
+                            messageList.Value.Clear();
                         }
-                        messageList.Value.Clear();
+                        else
+                        {
+                            List<GameMessage> updateMessages = new List<GameMessage>();
+                            for (int i = 0; i < 100; ++i)
+                            {
+                                updateMessages.Add(messageList.Value[0]);
+                                messageList.Value.Remove(messageList.Value[0]);
+                            }
+                            Connection conn;
+                            if (_server.Connections.TryGetValue(messageList.Key, out conn))
+                                conn.Send(GameMessage.MessageBundle(updateMessages));
+                        }                        
                     }
                 }
                 broadcastMessages.Clear();
@@ -481,7 +490,6 @@ namespace SpaceInvaders
         {
             try
             {
-
                 playerInfo.Add(clientNumber, new PlayerInfo(clientNumber));
                 _messageStacks.Add(clientNumber, new MessageStack<GameMessage>(500));
                 messages.Add(clientNumber, new List<GameMessage>());
