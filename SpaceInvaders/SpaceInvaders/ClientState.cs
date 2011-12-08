@@ -228,13 +228,13 @@ namespace SpaceInvaders
             try
             {
                 _infoStack.Push(String.Format("Disconnected from server: {0}", message.messageAsString()));
+                _client.Dispose();
+                _client = null;
             }
             catch (Exception e)
             {
                 _errorStack.Push(e.Message);
             }
-            _client.Dispose();
-            _client = null;
         }
 
         #endregion
