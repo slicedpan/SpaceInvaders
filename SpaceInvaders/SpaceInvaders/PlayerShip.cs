@@ -14,7 +14,7 @@ namespace SpaceInvaders
     {
         Texture2D sprite;
         public Color color;
-        int health = 100;
+        public int health = 100;
         List<IEntity> _creationList;
         KeyboardState _lastState = new KeyboardState();
         ClientState _clientState;
@@ -44,7 +44,7 @@ namespace SpaceInvaders
         {
             color = Color.White;
             mass = 10.0f;
-            collisionRadius = 8.0f;
+            collisionRadius = 14.0f;
         }
         public override int typeID
         {

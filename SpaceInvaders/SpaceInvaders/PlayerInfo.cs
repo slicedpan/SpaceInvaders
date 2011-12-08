@@ -10,6 +10,7 @@ namespace SpaceInvaders
         public int Score = 0;
         public int Health = 100;
         public int EntityID;
+        public bool Alive = true;
 
         public PlayerInfo(int entityID)
         {

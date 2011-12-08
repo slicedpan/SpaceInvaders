@@ -27,7 +27,7 @@ namespace SpaceInvaders
         public Bullet()
         {
             Friction = 0.0f;
-            collisionRadius = 4.0f;
+            collisionRadius = 8.0f;
         }
         public override int typeID
         {

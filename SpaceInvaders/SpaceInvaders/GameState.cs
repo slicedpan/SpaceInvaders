@@ -31,7 +31,7 @@ namespace SpaceInvaders
 
         protected ContentManager _contentManager;
 
-        int counter = 0;
+        protected int idCounter = 0;
 
         public void AddTestEntities()
         {
@@ -41,8 +41,8 @@ namespace SpaceInvaders
         public virtual void AddEntity(int ID, IEntity entityToAdd)
         {            
             entities.Add(ID, entityToAdd);
-            if (counter <= ID)
-                counter = ID + 1;
+            if (idCounter <= ID)
+                idCounter = ID + 1;
             entityToAdd.ID = ID;
             if (entityToAdd is PhysicalEntity)
                 physicalEntities.Add(entityToAdd as PhysicalEntity);
@@ -55,10 +55,10 @@ namespace SpaceInvaders
         }
         public int GetNextID()
         {
-            while (entities.Keys.Contains<int>(counter))
-                ++counter;
-            counter++;
-            return counter - 1;
+            while (entities.Keys.Contains<int>(idCounter))
+                ++idCounter;
+            idCounter++;
+            return idCounter - 1;
         }
 
         public int GetIndex(IEntity entity)
@@ -136,7 +136,10 @@ namespace SpaceInvaders
                 {
                     //AddEntity(message.index, new DummyEntity());
                 }
-                entities[message.index].HandleMessage(message, strict);
+                else
+                {
+                    entities[message.index].HandleMessage(message, strict);
+                }
             }
         }
 
@@ -168,8 +171,8 @@ namespace SpaceInvaders
                 }
             }
 
-            if (counter <= index)
-                counter = index + 1;
+            if (idCounter <= index)
+                idCounter = index + 1;
 
             switch (p)
             {

@@ -12,8 +12,8 @@ namespace SpaceInvaders
 {
     public class ClientState : GameState
     {  
-        int health;
-        int score;
+        int health = 100;
+        int score = 0;
         PlayerShip ship;
         int playerIndex = -1;
         public MessageBox errorBox;
@@ -159,9 +159,9 @@ namespace SpaceInvaders
 
         public void LoadContent(ContentManager cm)
         {
-            overlay = new MessageBox(2, 312, 400);
+            overlay = new MessageBox(2, 0, 700);
             overlay.color = Color.BlueViolet;
-            overlay.IsVisible = false;
+            overlay.IsVisible = true;
             _contentManager = cm;
         }
 
@@ -249,6 +249,7 @@ namespace SpaceInvaders
                         break;
                     case IndexHealthUpdate:
                         health = BitConverter.ToInt32(message.Message, 0);
+                        overlay.AddMessage(health.ToString());
                         break;
                     case IndexInitialisePlayerShip:
                         playerIndex = BitConverter.ToInt32(message.Message, 0);                        
@@ -281,6 +282,8 @@ namespace SpaceInvaders
                 }
                 else if (message.DataType == DataTypeSpawnEntity)
                 {
+                    if (message.index > idCounter)
+                        idCounter = message.index + 1;
                     HandleEntityUpdates(message, true);
                 }
                 else if (message.DataType == DataTypeReassignID)
@@ -319,6 +322,7 @@ namespace SpaceInvaders
 
         void StartRespawn()
         {
+            RemoveEntity(ship);
             overlay.IsVisible = true;
             overlay.AddMessage("Respawn in 10...");
             respawnCounter = 10;

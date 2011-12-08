@@ -159,11 +159,66 @@ namespace SpaceInvaders
                 broadcastMessages.Add(createdEntities[0].GetSpawnMessage());
                 createdEntities.Remove(createdEntities[0]);
             }
+            GenerateMetaInfo();
 
             CullEntities();
 
             HandleMessages();
 
+            UpdateClients();
+
+            if (secondCounter > 1000.0d)
+            {
+                foreach (IEntity entity in entities.Values)
+                {
+                    //_infoStack.Push(String.Format("Entity {0}, position {1}", entity.ID, entity.Position));
+                }
+                secondCounter = 0.0d;
+            }
+            
+            base.Update(gameTime);
+        }
+
+        private void GenerateMetaInfo()
+        {
+            int numPlayers = 0;
+            int deadPlayers = 0;
+            foreach (KeyValuePair<int, PlayerShip> kvp in ships)
+            {
+                ++numPlayers;
+                if (kvp.Value.isDead)
+                {
+                    RemoveEntity(kvp.Value);
+                    GameMessage deathMessage = new GameMessage();
+                    deathMessage.DataType = DataTypeMetaInfo;
+                    deathMessage.index = IndexPlayerDeath;
+                    deathMessage.SetMessage(new byte[1]);
+                    playerInfo[kvp.Key].Alive = false;
+                    ++deadPlayers;
+                }
+                GameMessage healthMessage = new GameMessage();
+                healthMessage.DataType = DataTypeMetaInfo;
+                healthMessage.index = IndexHealthUpdate;
+                healthMessage.SetMessage(BitConverter.GetBytes(kvp.Value.health));
+                GameMessage scoreMessage = new GameMessage();
+                scoreMessage.DataType = DataTypeMetaInfo;
+                scoreMessage.index = IndexScoreUpdate;
+                scoreMessage.SetMessage(BitConverter.GetBytes(playerInfo[kvp.Key].Score));
+                messages[kvp.Key].Add(healthMessage);
+                messages[kvp.Key].Add(scoreMessage);
+            }
+            if (deadPlayers == numPlayers)
+            {
+                GameMessage gameOverMessage = new GameMessage();
+                gameOverMessage.DataType = DataTypeMetaInfo;
+                gameOverMessage.index = IndexGameOver;
+                gameOverMessage.SetMessage(new byte[1]);
+                broadcastMessages.Add(gameOverMessage);
+            }
+        }
+
+        private void UpdateClients()
+        {
             if (updateCounter > (1000.0d / Game1.updatesPerSecond))
             {
                 if (numShips < maxNumShips)
@@ -196,7 +251,7 @@ namespace SpaceInvaders
                                 messageList.Value.Remove(messageList.Value[messageList.Value.Count - 1]);
                             }
                             Connection conn;
-                            if(_server.Connections.TryGetValue(messageList.Key, out conn))
+                            if (_server.Connections.TryGetValue(messageList.Key, out conn))
                                 conn.Send(GameMessage.MessageBundle(messageList.Value));
                         }
                         messageList.Value.Clear();
@@ -205,16 +260,6 @@ namespace SpaceInvaders
                 broadcastMessages.Clear();
                 updateCounter = 0.0d;
             }
-            if (secondCounter > 1000.0d)
-            {
-                foreach (IEntity entity in entities.Values)
-                {
-                    //_infoStack.Push(String.Format("Entity {0}, position {1}", entity.ID, entity.Position));
-                }
-                secondCounter = 0.0d;
-            }
-            
-            base.Update(gameTime);
         }
 
         private void HandleMessages()
@@ -281,6 +326,8 @@ namespace SpaceInvaders
                             if (message.DataType == GameState.DataTypeSpawnEntity)
                             {
                                 _infoStack.Push(String.Format("Spawning entity. index: {0}, typeID: {1}", message.index, BitConverter.ToInt32(message.Message, 16)));
+                                if (message.index > idCounter)
+                                    idCounter = message.index + 1;
                                 if (entities.Keys.Contains<int>(message.index))
                                 {
                                     int nextID = GetNextID();
