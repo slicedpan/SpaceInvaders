@@ -276,7 +276,7 @@ namespace SpaceInvaders
                         }
                         else
                         {
-                            while (messageList.Value.Count > 100)
+                            while (messageList.Value.Count > 250)
                             {
                                 messageList.Value.Remove(messageList.Value[messageList.Value.Count - 1]);
                             }
@@ -483,7 +483,7 @@ namespace SpaceInvaders
             {
 
                 playerInfo.Add(clientNumber, new PlayerInfo(clientNumber));
-                _messageStacks.Add(clientNumber, new MessageStack<GameMessage>(50));
+                _messageStacks.Add(clientNumber, new MessageStack<GameMessage>(500));
                 messages.Add(clientNumber, new List<GameMessage>());
 
                 _infoStack.Push(String.Format("Client {0} connected from address {1}", clientNumber, _server.Connections[clientNumber].Socket.RemoteEndPoint));
