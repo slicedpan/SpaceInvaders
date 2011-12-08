@@ -183,6 +183,7 @@ namespace SpaceInvaders
         {
             int numPlayers = 0;
             int deadPlayers = 0;
+            List<int> deadShips = new List<int>();
             foreach (KeyValuePair<int, PlayerShip> kvp in ships)
             {
                 ++numPlayers;
@@ -194,7 +195,9 @@ namespace SpaceInvaders
                     deathMessage.index = IndexPlayerDeath;
                     deathMessage.SetMessage(new byte[1]);
                     playerInfo[kvp.Key].Alive = false;
+                    messages[kvp.Key].Add(deathMessage);
                     ++deadPlayers;
+                    deadShips.Add(kvp.Key);
                 }
                 GameMessage healthMessage = new GameMessage();
                 healthMessage.DataType = DataTypeMetaInfo;
@@ -206,6 +209,10 @@ namespace SpaceInvaders
                 scoreMessage.SetMessage(BitConverter.GetBytes(playerInfo[kvp.Key].Score));
                 messages[kvp.Key].Add(healthMessage);
                 messages[kvp.Key].Add(scoreMessage);
+            }
+            foreach (int index in deadShips)
+            {
+                ships.Remove(index);
             }
             if (deadPlayers == numPlayers)
             {

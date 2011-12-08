@@ -20,6 +20,9 @@ namespace SpaceInvaders
         MessageBox clientBox;
         MessageBox serverBox;
         KeyboardState lastState = new KeyboardState();
+        Texture2D healthbar;
+        Rectangle healthrect = new Rectangle(0, 0, 200, 800);
+        Rectangle current = new Rectangle(2, 2, 20, 80);
 
         public ClientScreen()
         {
@@ -84,6 +87,14 @@ namespace SpaceInvaders
             clientBox.Draw();
             serverBox.Draw();
 
+            if (clientState.ship != null)
+            {
+                current.Height = ((clientState.ship.health * 8) / 10);
+                current.Y = 82 - current.Height;
+                healthrect.Height = (clientState.ship.health * 8);
+            }
+            Game1.SpriteBatch.Draw(healthbar, current, healthrect, Color.White, 0, Vector2.Zero, SpriteEffects.FlipVertically, 0);
+
             if (clientState.overlay != null)
             {
                 clientState.overlay.Draw();
@@ -102,6 +113,7 @@ namespace SpaceInvaders
             bgImg = contentManager.Load<Texture2D>("background");
             texDraw = contentManager.Load<Effect>("shaders/texdraw");
             clientState.LoadContent(contentManager);
+            healthbar = contentManager.Load<Texture2D>("healthbar");
         }
 
         #endregion
