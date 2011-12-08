@@ -8,13 +8,14 @@ Content\sideborder.xnb
 Content\tlcorner.xnb
 Content\topbotborder.xnb
 Content\blcorner.xnb
-Content\playersprite.xnb
 Content\background.xnb
+Content\playersprite.xnb
 Content\shaders\texdraw.xnb
-Content\galaxy.xnb
 Content\shaders\transition.xnb
+Content\galaxy.xnb
 Content\enemyship.xnb
 Content\bullet.xnb
 Content\circle.xnb
 Content\particle.xnb
 Content\healthbar.xnb
+Content\chunk.xnb

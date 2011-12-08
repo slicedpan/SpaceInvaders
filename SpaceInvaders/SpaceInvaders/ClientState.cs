@@ -354,6 +354,7 @@ namespace SpaceInvaders
             msg.SetMessage(new byte[1]);
             _messages.Add(msg);
             respawning = false;
+            overlay.IsVisible = false;
         }
 
         void timer_Elapsed(object sender, ElapsedEventArgs e)

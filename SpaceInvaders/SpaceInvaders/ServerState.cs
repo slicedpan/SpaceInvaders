@@ -24,7 +24,7 @@ namespace SpaceInvaders
         Dictionary<int, MessageStack<GameMessage>> _messageStacks = new Dictionary<int, MessageStack<GameMessage>>();
         public static ServerState currentInstance;
         int numShips = 0;
-        int maxNumShips = 2;
+        int maxNumShips = 8;
         bool gameActive = true;
 
         Color[] shipColors = new Color[16]
@@ -113,6 +113,12 @@ namespace SpaceInvaders
             _server.OnError = new ONet.GameServer.ErrorCallback(ErrorMessage);
             _infoStack = new MessageStack<string>(10);
             _errorStack = new MessageStack<string>(10);
+            float offset = 150.0f;
+            createdEntities.AddRange(BuildingChunk.CreateBuilding(new Vector2(512.0f, 600.0f)));
+            createdEntities.AddRange(BuildingChunk.CreateBuilding(new Vector2(512.0f + offset, 600.0f)));
+            createdEntities.AddRange(BuildingChunk.CreateBuilding(new Vector2(512.0f + 2 * offset, 600.0f)));
+            createdEntities.AddRange(BuildingChunk.CreateBuilding(new Vector2(512.0f - offset, 600.0f)));
+            createdEntities.AddRange(BuildingChunk.CreateBuilding(new Vector2(512.0f - 2 * offset, 600.0f)));
         }
 
         public override void AddEntity(int ID, IEntity entityToAdd)
@@ -141,6 +147,8 @@ namespace SpaceInvaders
             }
             base.RemoveEntity(entityToRemove);
         }
+
+        int secondsElapsed = 0;
 
         public override void Update(GameTime gameTime)
         {
@@ -180,6 +188,12 @@ namespace SpaceInvaders
                     //_infoStack.Push(String.Format("Entity {0}, position {1}", entity.ID, entity.Position));
                 }
                 secondCounter = 0.0d;
+                ++secondsElapsed;
+                if (secondsElapsed > 30)
+                {
+                    maxNumShips += 2;
+                    secondsElapsed = 0;
+                }
             }
             if (gameActive)
                 base.Update(gameTime);
@@ -240,7 +254,7 @@ namespace SpaceInvaders
                 if (numShips < maxNumShips)
                 {
                     var ship = new EnemyShip();
-                    ship.Place(new Vector2(rand.Next(Game1.width), rand.Next(Game1.height)));
+                    ship.Place(new Vector2(rand.Next(Game1.width), -100));
                     createdEntities.Add(ship);
                     ++numShips;
                 }
@@ -396,6 +410,8 @@ namespace SpaceInvaders
                     toBeRemoved.Add(removableEntities[i]);
                     _infoStack.Push(String.Format("Removing entity {0}:{1}", (removableEntities[i] as IEntity).ID, removableEntities[i].GetType().ToString()));
                     RemoveEntity(removableEntities[i] as IEntity);
+                    if (removableEntities[i] is EnemyShip)
+                        --numShips;
                 }
             }
             foreach (IRemovable removable in toBeRemoved)
@@ -473,7 +489,7 @@ namespace SpaceInvaders
                 _infoStack.Push(String.Format("Client {0} connected from address {1}", clientNumber, _server.Connections[clientNumber].Socket.RemoteEndPoint));
                 PlayerShip ship = new PlayerShip();
                 int clientShipIndex = AddEntity(ship);
-                ship.Place(new Vector2(Game1.width / 2.0f, Game1.height - 20.0f));
+                ship.Place(new Vector2(rand.Next(Game1.width - 100) + 50.0f, Game1.height - 50.0f));
                 ship.color = shipColors[clientNumber % 16];
 
                 ships.Add(clientNumber, ship);

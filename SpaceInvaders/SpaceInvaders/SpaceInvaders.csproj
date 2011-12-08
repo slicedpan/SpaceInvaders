@@ -110,6 +110,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildingChunk.cs" />
     <Compile Include="Bullet.cs" />
     <Compile Include="ClientInfo.cs" />
     <Compile Include="ClientScreen.cs" />

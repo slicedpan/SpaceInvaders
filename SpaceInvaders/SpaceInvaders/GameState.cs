@@ -187,10 +187,15 @@ namespace SpaceInvaders
                     enemyShip.HandleSpawnMessage(message);
                     AddEntity(index, enemyShip);
                     break;
-                case 2:                    
+                case 2:                   
                     var bullet = new Bullet();
                     bullet.HandleSpawnMessage(message);
                     AddEntity(index, bullet);
+                    break;
+                case 3:
+                    var chunk = new BuildingChunk();
+                    chunk.HandleSpawnMessage(message);
+                    AddEntity(index, chunk);
                     break;
             }            
         }

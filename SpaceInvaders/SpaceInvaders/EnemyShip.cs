@@ -39,8 +39,9 @@ namespace SpaceInvaders
         public EnemyShip()
         {
             rand = Game1.rand;
-            AITarget = new Vector2(rand.Next(Game1.width), rand.Next(Game1.height));
+            ChooseNewTarget();
             mass = 20.0f;
+            collisionRadius = 14.0f;
         }
 
         public override int typeID
@@ -56,7 +57,7 @@ namespace SpaceInvaders
         }
         public override void Draw(GameTime gameTime)
         {
-            Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + 2 * sprite.Height, sprite.Width, sprite.Height);
+            Rectangle rect = new Rectangle((int)_position.X - sprite.Width, (int)_position.Y + 2 * sprite.Height, sprite.Width * 2, sprite.Height * 2);
             Game1.SpriteBatch.Draw(sprite, rect, color);
         }   
 
@@ -124,7 +125,7 @@ namespace SpaceInvaders
 
         void ChooseNewTarget()
         {
-            AITarget = new Vector2((float)rand.Next(Game1.width), (float)rand.Next(Game1.height));
+            AITarget = new Vector2((float)rand.Next(Game1.width), (float)rand.Next(Game1.height - 500));
         }
 
         public Vector2 Target

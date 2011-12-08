@@ -14,7 +14,7 @@ namespace SpaceInvaders
     {
         Texture2D sprite;
         public Color color;
-        public int health = 10;
+        public int health = 100;
         List<IEntity> _creationList;
         KeyboardState _lastState = new KeyboardState();
         ClientState _clientState;
@@ -66,7 +66,7 @@ namespace SpaceInvaders
         }
         public override void Draw(Microsoft.Xna.Framework.GameTime gameTime)
         {
-            Rectangle rect = new Rectangle((int)_position.X - sprite.Width / 2, (int)_position.Y + sprite.Height, sprite.Width, sprite.Height);
+            Rectangle rect = new Rectangle((int)_position.X - sprite.Width, (int)_position.Y + sprite.Height, sprite.Width * 2, sprite.Height * 2);
             Game1.SpriteBatch.Draw(sprite, rect, color);            
         }
         public void InjectInput(KeyboardState ks, MouseState ms)
