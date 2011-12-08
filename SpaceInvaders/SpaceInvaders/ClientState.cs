@@ -367,7 +367,6 @@ namespace SpaceInvaders
             ship = entities[playerIndex] as PlayerShip;
             clientControlled.Add(ship);
             _infoStack.Push("Ship attached");
-            ship.color = new Color((int)message.Message[4], (int)message.Message[5], (int)message.Message[6]);
             ship.CreationList = createdEntities;
         }
         void Query(int index)

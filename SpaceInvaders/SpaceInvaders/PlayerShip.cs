@@ -14,7 +14,7 @@ namespace SpaceInvaders
     {
         Texture2D sprite;
         public Color color;
-        public int health = 100;
+        public int health = 10;
         List<IEntity> _creationList;
         KeyboardState _lastState = new KeyboardState();
         ClientState _clientState;

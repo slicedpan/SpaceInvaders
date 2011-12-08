@@ -17,6 +17,7 @@ namespace SpaceInvaders
         public const int IndexInitialisePlayerShip = 5;
         public const int IndexPlayerDeath = 6;
         public const int IndexGameOver = 7;
+        public const int IndexRespawnShip = 8;
         
         public const ushort DataTypeMetaInfo = 2;
         public const ushort DataTypeEntityUpdate = 1;

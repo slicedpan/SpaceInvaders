@@ -25,6 +25,7 @@ namespace SpaceInvaders
         public static ServerState currentInstance;
         int numShips = 0;
         int maxNumShips = 20;
+        bool gameActive = true;
 
         Color[] shipColors = new Color[16]
         {
@@ -147,10 +148,12 @@ namespace SpaceInvaders
             secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
 
             lastTime = gameTime.TotalGameTime.TotalSeconds;
-
-            foreach (IAIControlled AI in AIControlledEntities)
+            if (gameActive)
             {
-                AI.Think(gameTime);                
+                foreach (IAIControlled AI in AIControlledEntities)
+                {
+                    AI.Think(gameTime);
+                }
             }
 
             if (createdEntities.Count > 0)
@@ -159,7 +162,10 @@ namespace SpaceInvaders
                 broadcastMessages.Add(createdEntities[0].GetSpawnMessage());
                 createdEntities.Remove(createdEntities[0]);
             }
-            GenerateMetaInfo();
+            if (gameActive)
+            {
+                GenerateMetaInfo();
+            }
 
             CullEntities();
 
@@ -175,8 +181,8 @@ namespace SpaceInvaders
                 }
                 secondCounter = 0.0d;
             }
-            
-            base.Update(gameTime);
+            if (gameActive)
+                base.Update(gameTime);
         }
 
         private void GenerateMetaInfo()
@@ -221,6 +227,7 @@ namespace SpaceInvaders
                 gameOverMessage.index = IndexGameOver;
                 gameOverMessage.SetMessage(new byte[1]);
                 broadcastMessages.Add(gameOverMessage);
+                gameActive = false;
             }
         }
 
@@ -311,6 +318,13 @@ namespace SpaceInvaders
                                     messages[kvp.Key].Add(initMessage);
 
                                     _infoStack.Push(String.Format("Initialisation request from client {0}, ship index {1}", clientID, playerInfo[clientID].EntityID));
+                                    break;
+                                case GameState.IndexRespawnShip:
+                                    PlayerShip ship = new PlayerShip();
+                                    int clientShipIndex = AddEntity(ship);
+                                    ship.Place(new Vector2(Game1.width / 2.0f, Game1.height - 20.0f));
+                                    ship.color = shipColors[kvp.Key % 16];
+                                    ships.Add(kvp.Key, ship);
                                     break;
                             }
                         }
