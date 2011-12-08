@@ -176,12 +176,24 @@ namespace SpaceInvaders
 
         public override GameMessage GetSpawnMessage()
         {
-            return GetStateMessage();
+            GameMessage msg = new GameMessage();
+            msg.DataType = GameState.DataTypeSpawnEntity;
+            msg.index = ID;
+            byte[] array = new byte[24];
+            BitConverter.GetBytes(Position.X).CopyTo(array, 0);
+            BitConverter.GetBytes(Position.Y).CopyTo(array, 4);
+            BitConverter.GetBytes(Velocity.X).CopyTo(array, 8);
+            BitConverter.GetBytes(Velocity.Y).CopyTo(array, 12);
+            BitConverter.GetBytes(typeID).CopyTo(array, 16);
+            BitConverter.GetBytes(health).CopyTo(array, 20);
+            msg.SetMessage(array);
+            return msg; 
         }
 
         public override void HandleSpawnMessage(GameMessage message)
         {
-            HandleMessage(message, true);
+            base.HandleSpawnMessage(message);
+            health = BitConverter.ToInt32(message.Message, 20);
         }
     }
 }
