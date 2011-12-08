@@ -173,5 +173,15 @@ namespace SpaceInvaders
             base.HandleMessage(message, strict);
             health = BitConverter.ToInt32(message.Message, 16);
         }
+
+        public override GameMessage GetSpawnMessage()
+        {
+            return GetStateMessage();
+        }
+
+        public override void HandleSpawnMessage(GameMessage message)
+        {
+            HandleMessage(message, true);
+        }
     }
 }
