@@ -447,10 +447,10 @@ namespace SpaceInvaders
         }
 
         public void Message(int clientNumber, GameMessage message)
-        {
-            lastMessage[clientNumber] = lastTime;
+        {            
             try
             {
+                lastMessage[clientNumber] = lastTime;
                 if (message.DataType == GameMessage.Bundle)
                 {
                     foreach (GameMessage msg in GameMessage.SplitBundle(message))
