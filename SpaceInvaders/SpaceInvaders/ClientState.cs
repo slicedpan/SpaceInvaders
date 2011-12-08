@@ -79,7 +79,7 @@ namespace SpaceInvaders
             _client.OnError = new Client.ErrorCallback(ErrorCallback);
             _client.OnConnect = new Client.Callback(ConnectCallback);
             _client.OnDisconnect = new Client.Callback(DisconnectCallback);
-            _messageStack = new MessageStack<GameMessage>(50);
+            _messageStack = new MessageStack<GameMessage>(500);
             _infoStack = new MessageStack<string>(10);
             _errorStack = new MessageStack<string>(10);            
 

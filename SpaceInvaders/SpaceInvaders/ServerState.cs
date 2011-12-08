@@ -54,8 +54,6 @@ namespace SpaceInvaders
         List<IAIControlled> AIControlledEntities = new List<IAIControlled>();
         List<IRemovable> removableEntities = new List<IRemovable>();
 
-        Random rand;
-
         #region accessors
 
         public MessageStack<String> InfoStack
@@ -102,7 +100,6 @@ namespace SpaceInvaders
             {
                 throw new Exception("only one instance of ServerState is allowed");
             }
-            rand = new Random();
             flatList = new List<IEntity>();
             playerInfo= new Dictionary<int, PlayerInfo>();
             _server = new GameServer();
@@ -345,7 +342,7 @@ namespace SpaceInvaders
 
                                     PlayerShip ship = new PlayerShip();
                                     int clientShipIndex = AddEntity(ship);
-                                    ship.Place(new Vector2(Game1.width / 2.0f, Game1.height - 20.0f));
+                                    ship.Place(new Vector2(rand.Next(Game1.width - 100) + 50, Game1.height - 50.0f));
                                     ship.color = shipColors[kvp.Key % 16];
                                     ships.Add(kvp.Key, ship);
                                     playerInfo[kvp.Key].EntityID = clientShipIndex;
