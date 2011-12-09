@@ -141,7 +141,7 @@ namespace SpaceInvaders
         public void TakeDamage(int amount)
         {
             health -= amount;
-            if (health < 0)
+            if (health <= 0)
             {
                 active = false;
             }
