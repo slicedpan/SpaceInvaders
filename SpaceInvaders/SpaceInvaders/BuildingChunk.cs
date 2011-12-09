@@ -195,5 +195,13 @@ namespace SpaceInvaders
             base.HandleSpawnMessage(message);
             health = BitConverter.ToInt32(message.Message, 20);
         }
+
+        public int Health
+        {
+            get
+            {
+                return health;
+            }
+        }
     }
 }

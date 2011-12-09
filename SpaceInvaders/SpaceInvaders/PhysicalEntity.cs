@@ -15,6 +15,18 @@ namespace SpaceInvaders
         bool requiresUpdate = true;
         public float Friction = 0.3f;
         protected float collisionRadius = 10.0f;
+        GameState gameState;
+        public GameState GameState
+        {
+            get
+            {
+                return gameState;
+            }
+            set
+            {
+                gameState = value;
+            }
+        }
         public virtual float MaxSpeed
         {
             get

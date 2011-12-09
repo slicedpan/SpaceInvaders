@@ -8,5 +8,6 @@ namespace SpaceInvaders
     public interface IDamageable
     {
         void TakeDamage(int amount);
+        int Health { get; }
     }
 }

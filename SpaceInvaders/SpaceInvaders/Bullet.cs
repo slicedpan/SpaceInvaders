@@ -27,7 +27,7 @@ namespace SpaceInvaders
         public Bullet()
         {
             Friction = 0.0f;
-            collisionRadius = 8.0f;
+            collisionRadius = 5.0f;
         }
         public override int typeID
         {
@@ -66,12 +66,18 @@ namespace SpaceInvaders
         }
         public override void Collide(PhysicalEntity other)
         {
+            if (!active)
+                return;
             if (other.ID == ownerID || other is Bullet)
                 return;
             IDamageable damageableOther = other as IDamageable;
-            if (damageableOther != null)
+            if (damageableOther != null && damageableOther.Health > 0)
             {
                 damageableOther.TakeDamage(10);
+                if (damageableOther.Health <= 0)
+                {
+                    GameState.AwardScore(ownerID);
+                }
             }
             active = false;
         }

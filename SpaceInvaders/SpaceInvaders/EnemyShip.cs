@@ -151,5 +151,13 @@ namespace SpaceInvaders
         {
             get { return !active; }
         }
+
+        public int Health
+        {
+            get
+            {
+                return health;
+            }
+        }
     }
 }

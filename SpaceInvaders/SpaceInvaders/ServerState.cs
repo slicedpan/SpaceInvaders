@@ -151,6 +151,12 @@ namespace SpaceInvaders
             updateCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
             secondCounter += gameTime.ElapsedGameTime.TotalMilliseconds;
 
+            foreach (KeyValuePair<int, PlayerInfo> kvp in playerInfo)
+            {
+                kvp.Value.Score += ships[kvp.Key].score;
+                ships[kvp.Key].score = 0;
+            }
+
             lastTime = gameTime.TotalGameTime.TotalSeconds;
             if (gameActive)
             {

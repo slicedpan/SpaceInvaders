@@ -380,9 +380,10 @@ namespace SpaceInvaders
 
         public override void Draw(GameTime gameTime)
         {
+            Game1.SpriteBatch.DrawString(Game1.mbFont, score.ToString(), new Vector2(0.0f, 120.0f), Color.White);
             foreach (IEntity entity in clientSide)
             {
-                entity.Draw(gameTime);
+                entity.Draw(gameTime);                
             }
             base.Draw(gameTime);
         }

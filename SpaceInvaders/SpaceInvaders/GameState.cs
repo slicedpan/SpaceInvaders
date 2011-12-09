@@ -45,6 +45,7 @@ namespace SpaceInvaders
         {            
             entities.Add(ID, entityToAdd);
             entityToAdd.ID = ID;
+            entityToAdd.GameState = this;
             if (entityToAdd is PhysicalEntity)
                 physicalEntities.Add(entityToAdd as PhysicalEntity);
         }
@@ -114,10 +115,11 @@ namespace SpaceInvaders
             foreach (IEntity entity in entities.Values)
             {
                 entity.Draw(gameTime);
+                //Game1.SpriteBatch.DrawString(Game1.mbFont, entity.ID.ToString(), entity.Position, Color.White);
             }
             foreach (PhysicalEntity pe in physicalEntities)
             {
-                pe.DrawDebug();
+                //pe.DrawDebug();
             }
         }
 
@@ -221,5 +223,18 @@ namespace SpaceInvaders
             msg.SetMessage(array);
             return msg;
         }
+
+        public void AwardScore(int ownerID)
+        {
+            var player = entities[ownerID] as PlayerShip;
+            if (player != null)
+                player.score += 50;
+        }
+
+        public virtual void AddClientSideEntity(IEntity entity)
+        {
+
+        }
+
     }
 }

@@ -15,6 +15,7 @@ namespace SpaceInvaders
         Texture2D sprite;
         public Color color;
         public int health = 100;
+        public int score = 0;
         List<IEntity> _creationList;
         KeyboardState _lastState = new KeyboardState();
         ClientState _clientState;
@@ -177,6 +178,14 @@ namespace SpaceInvaders
                 bullet.Velocity = new Vector2(0.0f, -20.0f);
                 _creationList.Add(bullet);
 
+            }
+        }
+
+        public int Health
+        {
+            get
+            {
+                return health;
             }
         }
     }

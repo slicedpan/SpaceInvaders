@@ -100,5 +100,19 @@ namespace SpaceInvaders
         }
 
         #endregion
+
+        GameState _gameState;
+
+        public GameState GameState
+        {
+            get
+            {
+                return _gameState;
+            }
+            set
+            {
+                _gameState = value;
+            }
+        }
     }
 }

@@ -22,5 +22,6 @@ namespace SpaceInvaders
         int typeID { get; }
         Vector2 Position { get; }
         bool RequiresUpdate { get; set; }
+        GameState GameState { get; set; }
     }
 }
