@@ -231,7 +231,7 @@ namespace SpaceInvaders
                 player.score += 50;
         }
 
-        public virtual void AddClientSideEntity(IEntity entity)
+        public virtual void AddClientSideEntity(IClientEntity entity)
         {
 
         }

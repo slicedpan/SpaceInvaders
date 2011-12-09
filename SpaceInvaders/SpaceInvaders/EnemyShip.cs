@@ -143,7 +143,7 @@ namespace SpaceInvaders
             health -= amount;
             if (health <= 0)
             {
-                active = false;
+                 active = false;
             }
         }
 

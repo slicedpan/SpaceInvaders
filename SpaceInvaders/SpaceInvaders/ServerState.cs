@@ -286,6 +286,10 @@ namespace SpaceInvaders
                             Connection conn;
                             if (_server.Connections.TryGetValue(messageList.Key, out conn))
                                 conn.Send(GameMessage.MessageBundle(messageList.Value));
+                            else
+                            {
+
+                            }
                             messageList.Value.Clear();
                         }
                         else
@@ -298,7 +302,13 @@ namespace SpaceInvaders
                             }
                             Connection conn;
                             if (_server.Connections.TryGetValue(messageList.Key, out conn))
+                            {
                                 conn.Send(GameMessage.MessageBundle(updateMessages));
+                            }
+                            else
+                            {
+
+                            }
                         }                        
                     }
                 }
@@ -426,7 +436,7 @@ namespace SpaceInvaders
                     _infoStack.Push(String.Format("Removing entity {0}:{1}", (removableEntities[i] as IEntity).ID, removableEntities[i].GetType().ToString()));
                     RemoveEntity(removableEntities[i] as IEntity);
                     if (removableEntities[i] is EnemyShip)
-                        --numShips;
+                          --numShips;
                 }
             }
             foreach (IRemovable removable in toBeRemoved)

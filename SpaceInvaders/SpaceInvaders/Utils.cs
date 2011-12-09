@@ -24,6 +24,14 @@ namespace SpaceInvaders
             Color color = new Color((int)array[offset], (int)array[offset + 1], (int)array[offset + 2]);
             return color;
         }
+        public static int Clamp(int orig, int min, int max)
+        {
+            if (orig < min)
+                orig = min;
+            else if (orig > max)
+                orig = max;
+            return orig;
+        }
     }
     public static class ExtensionMethods
     {

@@ -27,7 +27,7 @@ namespace SpaceInvaders
         List<int> queries = new List<int>();
         List<IEntity> createdEntities = new List<IEntity>();
         Color shipColor = Color.White;
-        List<IEntity> clientSide = new List<IEntity>();
+        List<IClientEntity> clientSide = new List<IClientEntity>();
         public MessageBox overlay;
         Timer respawnTimer;
         int updateCount = 0;
@@ -152,9 +152,16 @@ namespace SpaceInvaders
                 if (msg != null)
                     HandleMessage(msg);
             }
-            foreach (IEntity entity in clientSide)
+            List<IClientEntity> clientEntitiesToRemove = new List<IClientEntity>();
+            foreach (IClientEntity entity in clientSide)
             {
                 entity.Update(gameTime);
+                if (entity.isReadyToRemove)
+                    clientEntitiesToRemove.Add(entity);
+            }
+            foreach (IClientEntity clientEntity in clientEntitiesToRemove)
+            {
+                clientSide.Remove(clientEntity);
             }
             
             base.Update(gameTime);           
@@ -381,7 +388,7 @@ namespace SpaceInvaders
         public override void Draw(GameTime gameTime)
         {
             Game1.SpriteBatch.DrawString(Game1.mbFont, score.ToString(), new Vector2(0.0f, 120.0f), Color.White);
-            foreach (IEntity entity in clientSide)
+            foreach (IClientEntity entity in clientSide)
             {
                 entity.Draw(gameTime);                
             }
@@ -425,6 +432,11 @@ namespace SpaceInvaders
         public void RequestInitialisation()
         {
             MakeRequest(GameState.IndexInitialisePlayerShip);
+        }
+        public override void AddClientSideEntity(IClientEntity entity)
+        {
+            entity.LoadContent(_contentManager);
+            clientSide.Add(entity);
         }
     }
 }

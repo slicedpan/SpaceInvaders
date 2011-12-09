@@ -112,6 +112,7 @@
   <ItemGroup>
     <Compile Include="BuildingChunk.cs" />
     <Compile Include="Bullet.cs" />
+    <Compile Include="ClientEntity.cs" />
     <Compile Include="ClientInfo.cs" />
     <Compile Include="ClientScreen.cs" />
     <Compile Include="ClientState.cs" />
@@ -128,6 +129,8 @@
     <Compile Include="MessageHook.cs" />
     <Compile Include="MessageStack.cs" />
     <Compile Include="MessageType.cs" />
+    <Compile Include="Particle.cs" />
+    <Compile Include="ParticleSystem.cs" />
     <Compile Include="PhysicalEntity.cs" />
     <Compile Include="PlayerInfo.cs" />
     <Compile Include="PlayerShip.cs" />

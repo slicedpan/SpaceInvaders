@@ -61,7 +61,8 @@ namespace SpaceInvaders
                 active = false;
             else
             {
-                base.Update(gameTime);
+                if (active)
+                    base.Update(gameTime);
             }
         }
         public override void Collide(PhysicalEntity other)
@@ -79,6 +80,7 @@ namespace SpaceInvaders
                     GameState.AwardScore(ownerID);
                 }
             }
+            GameState.AddClientSideEntity(new ParticleSystem(90, Position, color));
             active = false;
         }
 
